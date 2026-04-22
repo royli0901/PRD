@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>客户生命周期 · 阶段判定逻辑规范</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #0c0f15;
+  --bg2:      #131720;
+  --bg3:      #191e2a;
+  --bg4:      #1f2535;
+  --border:   rgba(255,255,255,0.07);
+  --border2:  rgba(255,255,255,0.13);
+  --text:     #cdd2e8;
+  --text-dim: #5c6280;
+  --text-mid: #8e96b8;
+  --white:    #eef0f8;
+
+  --sap:      #2dd4bf;
+  --sap-dim:  rgba(45,212,191,0.1);
+  --sap-bd:   rgba(45,212,191,0.28);
+
+  --crm:      #818cf8;
+  --crm-dim:  rgba(129,140,248,0.1);
+  --crm-bd:   rgba(129,140,248,0.28);
+
+  --calc:     #fb923c;
+  --calc-dim: rgba(251,146,60,0.1);
+  --calc-bd:  rgba(251,146,60,0.28);
+
+  --dual:     #e879f9;
+  --dual-dim: rgba(232,121,249,0.1);
+  --dual-bd:  rgba(232,121,249,0.28);
+
+  --green: #4ade80;
+  --yellow:#fbbf24;
+  --red:   #f87171;
+  --blue:  #60a5fa;
+
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Noto Sans SC', sans-serif;
+  --r: 10px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 14px; }
+body { background: var(--bg); color: var(--text); font-family: var(--sans); font-weight: 300; line-height: 1.7; }
+
+/* ── NAV ── */
+nav {
+  position: sticky; top: 0; z-index: 200;
+  background: rgba(12,15,21,0.93); backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+  height: 48px; padding: 0 1.5rem;
+  display: flex; align-items: center; gap: 0;
+  overflow-x: auto;
+}
+.nav-brand {
+  font-family: var(--mono); font-size: 0.7rem; font-weight: 700;
+  color: var(--sap); letter-spacing: 0.08em;
+  margin-right: 1.5rem; white-space: nowrap; flex-shrink: 0;
+}
+.nav-links { display: flex; }
+.nav-links a {
+  font-size: 0.72rem; color: var(--text-dim); text-decoration: none;
+  padding: 0 0.85rem; height: 48px; display: flex; align-items: center;
+  border-bottom: 2px solid transparent; transition: all 0.15s; white-space: nowrap;
+}
+.nav-links a:hover { color: var(--white); border-bottom-color: var(--border2); }
+.nav-biz {
+  margin-left: auto; display: flex; gap: 8px; align-items: center; flex-shrink: 0;
+}
+.biz-pill {
+  font-family: var(--mono); font-size: 0.62rem; font-weight: 700;
+  padding: 3px 10px; border-radius: 20px; letter-spacing: 0.06em;
+  border: 1px solid; cursor: pointer; transition: all 0.15s;
+}
+.biz-pill.int { color: var(--sap); border-color: var(--sap-bd); background: var(--sap-dim); }
+.biz-pill.com { color: var(--crm); border-color: var(--crm-bd); background: var(--crm-dim); }
+
+/* ── PAGE ── */
+.page { max-width: 1060px; margin: 0 auto; padding: 2.5rem 1.5rem 6rem; }
+
+/* ── HERO ── */
+.hero {
+  padding: 2.5rem 0 2rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 2.5rem;
+  display: grid; grid-template-columns: 1fr auto; gap: 2rem; align-items: end;
+}
+.hero-eye {
+  font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--text-dim); margin-bottom: 0.75rem;
+}
+h1 {
+  font-size: clamp(1.5rem,3vw,2.2rem); font-weight: 700; color: var(--white);
+  line-height: 1.2; letter-spacing: -0.02em; margin-bottom: 0.6rem;
+}
+h1 em { font-style: normal; color: var(--sap); }
+.hero-sub { font-size: 0.85rem; color: var(--text-mid); max-width: 540px; }
+.hero-tags { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
+.htag {
+  font-family: var(--mono); font-size: 0.62rem; font-weight: 700;
+  padding: 3px 10px; border-radius: 4px; letter-spacing: 0.06em;
+}
+.htag.sap { background: var(--sap-dim); color: var(--sap); border: 1px solid var(--sap-bd); }
+.htag.crm { background: var(--crm-dim); color: var(--crm); border: 1px solid var(--crm-bd); }
+.htag.calc{ background: var(--calc-dim); color: var(--calc); border: 1px solid var(--calc-bd); }
+.htag.dual{ background: var(--dual-dim); color: var(--dual); border: 1px solid var(--dual-bd); }
+
+/* ── SECTION ── */
+.sec { margin-bottom: 3rem; scroll-margin-top: 56px; }
+.sec-label {
+  font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--text-dim); margin-bottom: 0.65rem;
+  display: flex; align-items: center; gap: 10px;
+}
+.sec-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.sec-title { font-size: 1.1rem; font-weight: 700; color: var(--white); margin-bottom: 0.35rem; letter-spacing: -0.01em; }
+.sec-sub { font-size: 0.8rem; color: var(--text-mid); margin-bottom: 1.25rem; }
+
+/* ── LEGEND ROW ── */
+.legend-row {
+  display: flex; gap: 1.5rem; flex-wrap: wrap;
+  padding: 12px 16px;
+  background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r);
+  margin-bottom: 1.5rem;
+}
+.legend-item { display: flex; align-items: center; gap: 7px; font-size: 0.76rem; color: var(--text-mid); }
+.l-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+.l-dot.sap  { background: var(--sap); }
+.l-dot.crm  { background: var(--crm); }
+.l-dot.calc { background: var(--calc); }
+.l-dot.dual { background: var(--dual); }
+
+/* ── STAGE CARD ── */
+.stage-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--r); overflow: hidden; margin-bottom: 1rem;
+  transition: border-color 0.15s;
+}
+.stage-card:hover { border-color: var(--border2); }
+
+.stage-head {
+  padding: 13px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.stage-badge {
+  font-family: var(--mono); font-size: 0.68rem; font-weight: 700;
+  padding: 3px 10px; border-radius: 4px; flex-shrink: 0;
+  border: 1px solid;
+}
+.sb-sap  { background: var(--sap-dim);  color: var(--sap);  border-color: var(--sap-bd); }
+.sb-crm  { background: var(--crm-dim);  color: var(--crm);  border-color: var(--crm-bd); }
+.sb-calc { background: var(--calc-dim); color: var(--calc); border-color: var(--calc-bd); }
+.sb-dual { background: var(--dual-dim); color: var(--dual); border-color: var(--dual-bd); }
+
+.stage-name { font-size: 0.95rem; font-weight: 700; color: var(--white); }
+.stage-phase {
+  font-family: var(--mono); font-size: 0.65rem; color: var(--text-dim);
+  margin-left: auto; flex-shrink: 0;
+}
+.stage-body { padding: 16px 18px; display: flex; flex-direction: column; gap: 14px; }
+
+/* biz tag */
+.biz-tag {
+  display: inline-block; font-family: var(--mono); font-size: 0.6rem; font-weight: 700;
+  padding: 2px 7px; border-radius: 3px; letter-spacing: 0.05em; margin-right: 4px;
+}
+.biz-tag.int { background: var(--sap-dim); color: var(--sap); border: 1px solid var(--sap-bd); }
+.biz-tag.com { background: var(--crm-dim); color: var(--crm); border: 1px solid var(--crm-bd); }
+
+/* info grid */
+.igrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.iblock { display: flex; flex-direction: column; gap: 3px; }
+.ilabel {
+  font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--text-dim);
+}
+.ival { font-size: 0.8rem; color: var(--text-mid); line-height: 1.6; }
+.ival strong { color: var(--white); font-weight: 500; }
+
+/* code block */
+.cb {
+  background: var(--bg); border: 1px solid var(--border2);
+  border-left: 3px solid; border-radius: 0 6px 6px 0;
+  padding: 13px 15px; font-family: var(--mono); font-size: 0.74rem;
+  line-height: 1.95; color: var(--text-mid); overflow-x: auto; white-space: pre;
+}
+.cb.sap  { border-left-color: var(--sap); }
+.cb.crm  { border-left-color: var(--crm); }
+.cb.calc { border-left-color: var(--calc); }
+.cb.dual { border-left-color: var(--dual); }
+.cb.warn { border-left-color: var(--yellow); }
+.cb.info { border-left-color: var(--blue); }
+
+.c-kw  { color: #7dd3fc; }
+.c-str { color: #86efac; }
+.c-num { color: #fca5a5; }
+.c-cmt { color: #3d4460; }
+.c-sap { color: var(--sap); font-weight: 700; }
+.c-crm { color: var(--crm); font-weight: 700; }
+.c-calc{ color: var(--calc); font-weight: 700; }
+.c-dual{ color: var(--dual); font-weight: 700; }
+.c-hl  { color: var(--white); font-weight: 700; }
+.c-w   { color: var(--yellow); }
+.c-r   { color: var(--red); }
+
+/* field table */
+.ftable {
+  width: 100%; border-collapse: collapse; font-size: 0.78rem;
+  border: 1px solid var(--border); border-radius: 6px; overflow: hidden;
+}
+.ftable th {
+  background: var(--bg3); padding: 7px 12px;
+  font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text-dim); text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.ftable td {
+  padding: 8px 12px; border-bottom: 1px solid var(--border);
+  color: var(--text-mid); vertical-align: top; line-height: 1.55;
+}
+.ftable tr:last-child td { border-bottom: none; }
+.ftable tr:hover td { background: rgba(255,255,255,0.02); }
+.ftable td:first-child { font-family: var(--mono); font-size: 0.7rem; color: var(--sap); white-space: nowrap; }
+.ftable td:nth-child(2) { color: var(--white); }
+
+/* alert */
+.alert {
+  padding: 10px 14px; border-radius: 7px; font-size: 0.78rem;
+  line-height: 1.65; border: 1px solid; display: flex; gap: 10px; align-items: flex-start;
+}
+.alert.warn  { background: rgba(251,191,36,0.08); border-color: rgba(251,191,36,0.25); color: #fcd34d; }
+.alert.info  { background: rgba(96,165,250,0.08); border-color: rgba(96,165,250,0.25); color: #93c5fd; }
+.alert.dual  { background: var(--dual-dim); border-color: var(--dual-bd); color: #f0abfc; }
+.alert-icon  { flex-shrink: 0; margin-top: 1px; }
+.alert strong { font-weight: 600; }
+
+/* divider */
+.divider { height: 1px; background: var(--border); margin: 2.5rem 0; }
+
+/* responsive */
+@media (max-width: 700px) {
+  .igrid { grid-template-columns: 1fr; }
+  .hero { grid-template-columns: 1fr; }
+  .hero-tags { align-items: flex-start; flex-direction: row; flex-wrap: wrap; }
+}
+
+@keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } }
+.stage-card { animation: fadeUp 0.35s ease both; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">LC-STAGE · DEV</div>
+  <div class="nav-links">
+    <a href="#overview">概览</a>
+    <a href="#int">模塑一体</a>
+    <a href="#com">商品模</a>
+    <a href="#shared">共用字段</a>
+    <a href="#flow">判定流程</a>
+  </div>
+  <div class="nav-biz">
+    <span class="biz-pill int">模塑一体 INT</span>
+    <span class="biz-pill com">商品模 COM</span>
+  </div>
+</nav>
+
+<div class="page">
+
+<!-- HERO -->
+<div class="hero">
+  <div>
+    <div class="hero-eye">客户生命周期 · 阶段判定逻辑规范</div>
+    <h1>生命周期阶段<br><em>计算逻辑与取值规范</em></h1>
+    <p class="hero-sub">本文档面向开发团队，为模塑一体（6阶段）和商品模（6阶段）提供完整的 SAP/CRM 取数字段、判定公式、时间窗口定义及自动化触发机制。</p>
+  </div>
+  <div class="hero-tags">
+    <span class="htag sap">SAP 自动取数</span>
+    <span class="htag crm">CRM 查询</span>
+    <span class="htag calc">需计算/推断</span>
+    <span class="htag dual">SAP + CRM 联合</span>
+  </div>
+</div>
+
+
+<!-- ═══ OVERVIEW ═══ -->
+<div class="sec" id="overview">
+  <div class="sec-label">00</div>
+  <div class="sec-title">判定逻辑概览</div>
+  <div class="sec-sub">12 个阶段（两套业务各 6 个）的数据来源分类汇总</div>
+
+  <div class="legend-row">
+    <div class="legend-item"><div class="l-dot sap"></div>SAP 自动取数 — 直接查询 SAP 订单/账款/项目表</div>
+    <div class="legend-item"><div class="l-dot crm"></div>CRM 查询 — 直接查询 CRM 商机/RFQ/报价记录</div>
+    <div class="legend-item"><div class="l-dot calc"></div>需计算 — 基于 SAP 数据做时间窗口/增长率等衍生计算</div>
+    <div class="legend-item"><div class="l-dot dual"></div>SAP + CRM 联合 — 两系统数据同时参与判定（AND/OR 逻辑）</div>
+  </div>
+
+  <table class="ftable">
+    <thead>
+      <tr><th>业务</th><th>阶段</th><th>名称</th><th>数据来源</th><th>核心判定逻辑类型</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="biz-tag int">INT</span></td>
+        <td style="font-family:var(--mono);color:var(--text-dim);">P1</td>
+        <td style="color:var(--white);">潜在客户</td>
+        <td><span class="htag dual" style="font-size:0.6rem;">联合</span></td>
+        <td>CRM 活跃商机 AND SAP 无成交（负向核验）</td>
+      </tr>
+      <tr>
+        <td><span class="biz-tag int">INT</span></td>
+        <td style="font-family:var(--mono);color:var(--text-dim);">P2</td>
+        <td style="color:var(--white);">新客户导入</td>
+        <td><span class="htag sap" style="font-size:0.6rem;">SAP</span></td>
+        <td>项目号计数 = 1 AND 存在模具 SO</td>
+      </tr>
+      <tr>
+        <td><span class="biz-tag int">INT</span></td>
+        <td style="font-family:var(--mono);color:var(--text-dim);">P3</td>
+        <td style="color:var(--white);">成长阶段</td>
+        <td><span class="htag calc" style="font-size:0.6rem;">计算</span></td>
+        <td>近6月新项目号 ≥ 2 OR 采购额环比增长 &gt; 15%</td>
+      </tr>
+      <tr>
+        <td><span class="biz-tag int">INT</span></td>
+        <td style="font-family:var(--mono);color:var(--text-dim);">P4</td>
+        <td style="color:var(--white);">成熟阶段</td>
+        <td><span class="htag calc" style="font-size:0.6rem;">计算</span></td>
+        <td>连续12月有 PO AND 项目总数 ≥ 3</td>
+      </tr>
+      <tr>
+        <td><span class="biz-tag int">INT</span></td>
+        <td style="font-family:var(--mono);color:var(--text-dim);">P5</td>
+        <td style="color:var(--white);">衰退阶段</td>
+        <td><span class="htag dual" style="font-size:0.6rem;">联合</span></td>
+        <td>CRM 6月无新 RFQ AND SAP 采购额同比下降 &gt; 15%</td>
+      </tr>
+      <tr>
+        <td><span class="biz-tag int">INT</span></td>
+        <td style="font-family:var(--mono);color:var(--text-dim);">P6</td>
+        <td style="color:var(--white);">流失/赢回</td>
+        <td><span class="htag dual" style="font-size:0.6rem;">联合</span></td>
+        <td>SAP 6月无发货 AND CRM 无活跃 RFQ</td>
+      </tr>
+      <tr>
+        <td><span class="biz-tag com">COM</span></td>
+        <td style="font-family:var(--mono);color:var(--text-dim);">P1</td>
+        <td style="color:var(--white);">潜在客户</td>
+        <td><span class="htag dual" style="font-size:0.6rem;">联合</span></td>
+        <td>CRM 活跃商机 AND SAP 无成交（同 INT-P1）</td>
+      </tr>
+      <tr>
+        <td><span class="biz-tag com">COM</span></td>
+        <td style="font-family:var(--mono);color:var(--text-dim);">P2</td>
+        <td style="color:var(--white);">新客户导入</td>
+        <td><span class="htag sap" style="font-size:0.6rem;">SAP</span></td>
+        <td>项目号计数 = 1 AND 已转 PO</td>
+      </tr>
+      <tr>
+        <td><span class="biz-tag com">COM</span></td>
+        <td style="font-family:var(--mono);color:var(--text-dim);">P3</td>
+        <td style="color:var(--white);">成长阶段</td>
+        <td><span class="htag calc" style="font-size:0.6rem;">计算</span></td>
+        <td>近12月项目号 &gt; 2</td>
+      </tr>
+      <tr>
+        <td><span class="biz-tag com">COM</span></td>
+        <td style="font-family:var(--mono);color:var(--text-dim);">P4</td>
+        <td style="color:var(--white);">成熟阶段</td>
+        <td><span class="htag calc" style="font-size:0.6rem;">计算</span></td>
+        <td>连续 2 个自然年均有成交记录</td>
+      </tr>
+      <tr>
+        <td><span class="biz-tag com">COM</span></td>
+        <td style="font-family:var(--mono);color:var(--text-dim);">P6</td>
+        <td style="color:var(--white);">衰退阶段</td>
+        <td><span class="htag dual" style="font-size:0.6rem;">联合</span></td>
+        <td>SAP 12月无新成交 AND CRM 6月无新 RFQ</td>
+      </tr>
+      <tr>
+        <td><span class="biz-tag com">COM</span></td>
+        <td style="font-family:var(--mono);color:var(--text-dim);">P7</td>
+        <td style="color:var(--white);">流失/赢回</td>
+        <td><span class="htag sap" style="font-size:0.6rem;">SAP</span></td>
+        <td>SAP 连续18月无新成交</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+
+<!-- ═══ INT ═══ -->
+<div class="sec" id="int">
+  <div class="sec-label">01</div>
+  <div class="sec-title">模塑一体业务（INT）· 阶段判定详细规范</div>
+  <div class="sec-sub">6 个生命周期阶段，覆盖从潜在到流失的完整客户旅程</div>
+
+  <!-- INT-P1 -->
+  <div class="stage-card" style="animation-delay:0.05s">
+    <div class="stage-head">
+      <span class="stage-badge sb-dual">SAP + CRM</span>
+      <span class="biz-tag int">INT</span>
+      <span class="stage-name">P1 · 潜在客户</span>
+      <span class="stage-phase">商务接洽期</span>
+    </div>
+    <div class="stage-body">
+      <div class="igrid">
+        <div class="iblock">
+          <div class="ilabel">CRM 取数</div>
+          <div class="ival"><strong>商机模块</strong>：状态为活跃（Open/In-Progress）的商机记录，按客户编号过滤</div>
+        </div>
+        <div class="iblock">
+          <div class="ilabel">SAP 负向核验</div>
+          <div class="ival"><strong>SD 销售订单 / CO 项目</strong>：查询该客户是否存在任何已确认订单或项目号，结果为空才满足</div>
+        </div>
+      </div>
+      <div>
+        <div class="ilabel" style="margin-bottom:7px;">判定逻辑</div>
+        <div class="cb dual"><span class="c-cmt">-- INT-P1: 潜在客户判定</span>
+<span class="c-cmt">-- 条件：CRM 有活跃商机 AND SAP 无任何成交记录</span>
+
+<span class="c-crm">CRM_ACTIVE_OPP</span>  = COUNT(*)
+  FROM crm.opportunities
+  WHERE customer_id = :cust_id
+    AND stage NOT IN (<span class="c-str">'Closed Won'</span>, <span class="c-str">'Closed Lost'</span>)
+
+<span class="c-sap">SAP_HAS_RECORD</span>  = COUNT(*)
+  FROM sap.sales_orders   <span class="c-cmt">-- VBAK/VBAP</span>
+  WHERE KUNNR = :cust_id
+    AND order_status NOT IN (<span class="c-str">'Cancelled'</span>)
+
+<span class="c-hl">IS_P1</span> = (<span class="c-crm">CRM_ACTIVE_OPP</span> > <span class="c-num">0</span>) AND (<span class="c-sap">SAP_HAS_RECORD</span> = <span class="c-num">0</span>)</div>
+      </div>
+      <div class="alert info">
+        <div class="alert-icon">ℹ</div>
+        <div><strong>SAP 负向核验范围：</strong>应包含销售订单（VBAK）、模具合同（CO 内部订单 AUFNR）、项目号（WBS/PRSNR）三类，任意一类存在均视为"有成交记录"，P1 条件不满足。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INT-P2 -->
+  <div class="stage-card" style="animation-delay:0.08s">
+    <div class="stage-head">
+      <span class="stage-badge sb-sap">SAP AUTO</span>
+      <span class="biz-tag int">INT</span>
+      <span class="stage-name">P2 · 新客户导入</span>
+      <span class="stage-phase">准量产启动期</span>
+    </div>
+    <div class="stage-body">
+      <div class="igrid">
+        <div class="iblock">
+          <div class="ilabel">SAP 模块</div>
+          <div class="ival"><strong>CO / PS</strong>：项目号（AUFNR/PRSNR）+ <strong>SD</strong>：模具销售订单类型过滤</div>
+        </div>
+        <div class="iblock">
+          <div class="ilabel">关键过滤条件</div>
+          <div class="ival">订单类型须为<strong>模具类（SO_TYPE = 'MOLD'）</strong>，注塑量产 PO 不计入</div>
+        </div>
+      </div>
+      <div>
+        <div class="ilabel" style="margin-bottom:7px;">判定逻辑</div>
+        <div class="cb sap"><span class="c-cmt">-- INT-P2: 新客户导入判定</span>
+<span class="c-cmt">-- 条件：SAP 项目号总数 = 1 AND 该项目已产生模具 SO</span>
+
+<span class="c-sap">PROJ_COUNT</span>       = COUNT(DISTINCT project_id)
+  FROM sap.projects   <span class="c-cmt">-- CO/PS 项目主数据</span>
+  WHERE KUNNR = :cust_id
+    AND project_status NOT IN (<span class="c-str">'Cancelled'</span>, <span class="c-str">'Rejected'</span>)
+
+<span class="c-sap">HAS_MOLD_SO</span>      = COUNT(*)
+  FROM sap.sales_orders   <span class="c-cmt">-- VBAK/VBAP</span>
+  WHERE KUNNR = :cust_id
+    AND order_type = <span class="c-str">'MOLD'</span>   <span class="c-cmt">-- 模具类订单类型</span>
+    AND order_status = <span class="c-str">'Confirmed'</span>
+
+<span class="c-hl">IS_P2</span> = (<span class="c-sap">PROJ_COUNT</span> = <span class="c-num">1</span>) AND (<span class="c-sap">HAS_MOLD_SO</span> > <span class="c-num">0</span>)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INT-P3 -->
+  <div class="stage-card" style="animation-delay:0.11s">
+    <div class="stage-head">
+      <span class="stage-badge sb-calc">需计算</span>
+      <span class="biz-tag int">INT</span>
+      <span class="stage-name">P3 · 成长阶段</span>
+      <span class="stage-phase">业务爆发期</span>
+    </div>
+    <div class="stage-body">
+      <div class="igrid">
+        <div class="iblock">
+          <div class="ilabel">SAP 模块</div>
+          <div class="ival"><strong>CO/PS 项目</strong>（项目启动日期）+ <strong>SD/FI</strong>（采购金额统计）</div>
+        </div>
+        <div class="iblock">
+          <div class="ilabel">时间窗口</div>
+          <div class="ival">滚动 <strong>6 个月</strong>（TODAY − 180 天至 TODAY）</div>
+        </div>
+      </div>
+      <div>
+        <div class="ilabel" style="margin-bottom:7px;">判定逻辑（OR 关系，满足其一即进入P3）</div>
+        <div class="cb calc"><span class="c-cmt">-- INT-P3: 成长阶段判定（双条件 OR）</span>
+
+<span class="c-cmt">-- 条件A：近6个月新启动项目号 ≥ 2</span>
+<span class="c-calc">NEW_PROJ_6M</span>      = COUNT(DISTINCT project_id)
+  FROM sap.projects
+  WHERE KUNNR = :cust_id
+    AND start_date >= (TODAY - <span class="c-num">180</span>)
+    AND project_status NOT IN (<span class="c-str">'Cancelled'</span>)
+
+<span class="c-cmt">-- 条件B：采购金额环比增长 > 15%</span>
+<span class="c-cmt">-- 定义：当前6个月采购额 vs 前6个月采购额</span>
+<span class="c-calc">AMT_CURR_6M</span>      = SUM(net_value)   <span class="c-cmt">-- VBAP.NETWR，已确认订单</span>
+  FROM sap.sales_orders
+  WHERE KUNNR = :cust_id
+    AND confirm_date BETWEEN (TODAY-<span class="c-num">180</span>) AND TODAY
+
+<span class="c-calc">AMT_PREV_6M</span>      = SUM(net_value)
+  FROM sap.sales_orders
+  WHERE KUNNR = :cust_id
+    AND confirm_date BETWEEN (TODAY-<span class="c-num">360</span>) AND (TODAY-<span class="c-num">181</span>)
+
+<span class="c-calc">MOM_GROWTH</span>       = (AMT_CURR_6M - AMT_PREV_6M) / NULLIF(AMT_PREV_6M, <span class="c-num">0</span>) × <span class="c-num">100</span>
+<span class="c-cmt">-- NULLIF 防止除零；前期无数据时 MOM_GROWTH = NULL，该条件不满足</span>
+
+<span class="c-hl">IS_P3</span> = (<span class="c-calc">NEW_PROJ_6M</span> >= <span class="c-num">2</span>) OR (<span class="c-calc">MOM_GROWTH</span> > <span class="c-num">15</span>)</div>
+      </div>
+      <div class="alert warn">
+        <div class="alert-icon">⚠</div>
+        <div><strong>注意：</strong>前6个月（AMT_PREV_6M）为零时，增长率计算结果为 NULL（不满足增长条件），不应视为"无穷大增长"触发 P3。建议在业务文档中明确此边界，避免新客第一期数据被误判为成长期。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INT-P4 -->
+  <div class="stage-card" style="animation-delay:0.14s">
+    <div class="stage-head">
+      <span class="stage-badge sb-calc">需计算</span>
+      <span class="biz-tag int">INT</span>
+      <span class="stage-name">P4 · 成熟阶段</span>
+      <span class="stage-phase">高效收益期</span>
+    </div>
+    <div class="stage-body">
+      <div class="igrid">
+        <div class="iblock">
+          <div class="ilabel">SAP 模块</div>
+          <div class="ival"><strong>SD 采购订单 EKKO/EKPO</strong>（PO 按月分组）+ <strong>CO/PS</strong>（项目号总数）</div>
+        </div>
+        <div class="iblock">
+          <div class="ilabel">时间窗口</div>
+          <div class="ival">滚动 <strong>12 个月</strong>，按自然月分组（12 个 bucket）</div>
+        </div>
+      </div>
+      <div>
+        <div class="ilabel" style="margin-bottom:7px;">判定逻辑（AND 关系，两条件同时满足）</div>
+        <div class="cb calc"><span class="c-cmt">-- INT-P4: 成熟阶段判定</span>
+
+<span class="c-cmt">-- 条件A：连续12个月均有滚动PO（每月至少1张）</span>
+<span class="c-calc">PO_MONTHS</span>        = COUNT(DISTINCT DATE_FORMAT(po_date, <span class="c-str">'YYYY-MM'</span>))
+  FROM sap.purchase_orders   <span class="c-cmt">-- EKKO/EKPO</span>
+  WHERE KUNNR = :cust_id
+    AND po_date >= DATE_SUB(TODAY, INTERVAL <span class="c-num">12</span> MONTH)
+    AND po_status = <span class="c-str">'Active'</span>
+<span class="c-cmt">-- 连续性判断：需验证 12 个月内无断月，而非仅统计总月数</span>
+<span class="c-cmt">-- 建议实现：生成 12 个月日历，LEFT JOIN PO 数据，检查无空月</span>
+<span class="c-calc">HAS_CONTINUOUS_PO</span>= (MISSING_MONTHS_COUNT = <span class="c-num">0</span>)  <span class="c-cmt">-- 见注释</span>
+
+<span class="c-cmt">-- 条件B：项目总数 ≥ 3</span>
+<span class="c-calc">TOTAL_PROJ_COUNT</span> = COUNT(DISTINCT project_id)
+  FROM sap.projects
+  WHERE KUNNR = :cust_id
+    AND project_status NOT IN (<span class="c-str">'Cancelled'</span>, <span class="c-str">'Rejected'</span>)
+
+<span class="c-hl">IS_P4</span> = <span class="c-calc">HAS_CONTINUOUS_PO</span> AND (<span class="c-calc">TOTAL_PROJ_COUNT</span> >= <span class="c-num">3</span>)</div>
+      </div>
+      <div class="alert info">
+        <div class="alert-icon">ℹ</div>
+        <div><strong>连续性判断实现建议：</strong>使用日历表（dim_date）生成近12个月的月份列表，LEFT JOIN 到 PO 数据，统计 po_count = 0 的月份数（MISSING_MONTHS_COUNT）。若 = 0 则视为"连续"，存在任何断月则 HAS_CONTINUOUS_PO = FALSE。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INT-P5 -->
+  <div class="stage-card" style="animation-delay:0.17s">
+    <div class="stage-head">
+      <span class="stage-badge sb-dual">SAP + CRM</span>
+      <span class="biz-tag int">INT</span>
+      <span class="stage-name">P5 · 衰退阶段</span>
+      <span class="stage-phase">产能萎缩预警</span>
+    </div>
+    <div class="stage-body">
+      <div class="igrid">
+        <div class="iblock">
+          <div class="ilabel">CRM 取数</div>
+          <div class="ival"><strong>RFQ / 商机模块</strong>：近6个月是否有新建 RFQ 记录</div>
+        </div>
+        <div class="iblock">
+          <div class="ilabel">SAP 取数</div>
+          <div class="ival"><strong>SD 销售订单</strong>：采购金额同比（当年 vs 上年同期）</div>
+        </div>
+      </div>
+      <div>
+        <div class="ilabel" style="margin-bottom:7px;">判定逻辑（AND 关系，两条件同时满足）</div>
+        <div class="cb dual"><span class="c-cmt">-- INT-P5: 衰退阶段判定（双系统 AND）</span>
+
+<span class="c-cmt">-- 条件A（CRM）：连续6个月无新 RFQ</span>
+<span class="c-crm">NEW_RFQ_6M</span>       = COUNT(*)
+  FROM crm.rfq_records
+  WHERE customer_id = :cust_id
+    AND created_date >= (TODAY - <span class="c-num">180</span>)
+    AND rfq_status != <span class="c-str">'Cancelled'</span>
+
+<span class="c-cmt">-- 条件B（SAP）：采购金额同比下降 > 15%</span>
+<span class="c-cmt">-- 定义：当前12个月 vs 上一个12个月（同比，非环比）</span>
+<span class="c-sap">AMT_CY</span>           = SUM(net_value)   <span class="c-cmt">-- 当年滚动12月</span>
+  FROM sap.sales_orders
+  WHERE KUNNR = :cust_id
+    AND confirm_date BETWEEN (TODAY-<span class="c-num">365</span>) AND TODAY
+
+<span class="c-sap">AMT_PY</span>           = SUM(net_value)   <span class="c-cmt">-- 上年同期12月</span>
+  FROM sap.sales_orders
+  WHERE KUNNR = :cust_id
+    AND confirm_date BETWEEN (TODAY-<span class="c-num">730</span>) AND (TODAY-<span class="c-num">366</span>)
+
+<span class="c-calc">YOY_DECLINE</span>      = (AMT_PY - AMT_CY) / NULLIF(AMT_PY, <span class="c-num">0</span>) × <span class="c-num">100</span>
+<span class="c-cmt">-- 正值表示下降，即 AMT_CY < AMT_PY</span>
+
+<span class="c-hl">IS_P5</span> = (<span class="c-crm">NEW_RFQ_6M</span> = <span class="c-num">0</span>) AND (<span class="c-calc">YOY_DECLINE</span> > <span class="c-num">15</span>)</div>
+      </div>
+      <div class="alert warn">
+        <div class="alert-icon">⚠</div>
+        <div><strong>预警前置建议：</strong>当 NEW_RFQ_6M = 0 但 YOY_DECLINE 尚未达到 15% 时，建议触发"衰退预警"（非正式阶段判定），推送给客户经理提前干预，而不是等到两条件同时满足才报警。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INT-P6 -->
+  <div class="stage-card" style="animation-delay:0.2s">
+    <div class="stage-head">
+      <span class="stage-badge sb-dual">SAP + CRM</span>
+      <span class="biz-tag int">INT</span>
+      <span class="stage-name">P6 · 流失/赢回</span>
+      <span class="stage-phase">供应脱钩期</span>
+    </div>
+    <div class="stage-body">
+      <div class="igrid">
+        <div class="iblock">
+          <div class="ilabel">SAP 取数</div>
+          <div class="ival"><strong>WM 发货通知 LIKP</strong> 或 <strong>FI 收款凭证</strong>：近6个月是否有发货/入账记录</div>
+        </div>
+        <div class="iblock">
+          <div class="ilabel">CRM 取数</div>
+          <div class="ival"><strong>RFQ / 商机模块</strong>：近6个月是否有任何活跃 RFQ</div>
+        </div>
+      </div>
+      <div>
+        <div class="ilabel" style="margin-bottom:7px;">判定逻辑（AND 关系）</div>
+        <div class="cb dual"><span class="c-cmt">-- INT-P6: 流失/赢回判定</span>
+<span class="c-cmt">-- 注：原始规则"无发货（或无入账）"为OR关系，建议优先用发货记录，入账作为兜底</span>
+
+<span class="c-cmt">-- 条件A（SAP）：连续6个月无发货记录</span>
+<span class="c-sap">SHIP_6M</span>          = COUNT(*)
+  FROM sap.deliveries   <span class="c-cmt">-- LIKP，出库类型过滤</span>
+  WHERE KUNNR = :cust_id
+    AND actual_gi_date >= (TODAY - <span class="c-num">180</span>)
+    AND delivery_status = <span class="c-str">'Completed'</span>
+
+<span class="c-cmt">-- 兜底方案（发货数据不可用时）：查 FI 收款</span>
+<span class="c-sap">PAYMENT_6M</span>       = COUNT(*)
+  FROM sap.fi_payments   <span class="c-cmt">-- BSID/BSAD 已清凭证</span>
+  WHERE KUNNR = :cust_id
+    AND clearing_date >= (TODAY - <span class="c-num">180</span>)
+
+<span class="c-cmt">-- 条件B（CRM）：无活跃 RFQ</span>
+<span class="c-crm">ACTIVE_RFQ_6M</span>    = COUNT(*)
+  FROM crm.rfq_records
+  WHERE customer_id = :cust_id
+    AND created_date >= (TODAY - <span class="c-num">180</span>)
+    AND rfq_status NOT IN (<span class="c-str">'Cancelled'</span>, <span class="c-str">'Closed Lost'</span>)
+
+<span class="c-hl">IS_P6</span> = ((<span class="c-sap">SHIP_6M</span> = <span class="c-num">0</span>) OR (<span class="c-sap">PAYMENT_6M</span> = <span class="c-num">0</span>)) AND (<span class="c-crm">ACTIVE_RFQ_6M</span> = <span class="c-num">0</span>)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══ COM ═══ -->
+<div class="sec" id="com">
+  <div class="sec-label">02</div>
+  <div class="sec-title">商品模业务（COM）· 阶段判定详细规范</div>
+  <div class="sec-sub">6 个生命周期阶段，以模具项目为核心指标</div>
+
+  <!-- COM-P1 -->
+  <div class="stage-card" style="animation-delay:0.05s">
+    <div class="stage-head">
+      <span class="stage-badge sb-dual">SAP + CRM</span>
+      <span class="biz-tag com">COM</span>
+      <span class="stage-name">P1 · 潜在客户</span>
+      <span class="stage-phase">准入与寻源期</span>
+    </div>
+    <div class="stage-body">
+      <div class="igrid">
+        <div class="iblock">
+          <div class="ilabel">与 INT-P1 的差异</div>
+          <div class="ival">逻辑完全相同，区别在于 CRM 商机类型须过滤为<strong>商品模类（OPP_TYPE = 'MOLD'）</strong></div>
+        </div>
+        <div class="iblock">
+          <div class="ilabel">SAP 无成交定义</div>
+          <div class="ival">商品模无 SAP 注塑项目，仅查<strong>模具合同订单（AUFNR）</strong>是否存在</div>
+        </div>
+      </div>
+      <div>
+        <div class="ilabel" style="margin-bottom:7px;">判定逻辑</div>
+        <div class="cb dual"><span class="c-cmt">-- COM-P1: 潜在客户（逻辑同 INT-P1，类型过滤不同）</span>
+
+<span class="c-crm">CRM_ACTIVE_OPP</span>  = COUNT(*)
+  FROM crm.opportunities
+  WHERE customer_id = :cust_id
+    AND opp_type = <span class="c-str">'MOLD'</span>   <span class="c-cmt">-- 商品模类型过滤</span>
+    AND stage NOT IN (<span class="c-str">'Closed Won'</span>, <span class="c-str">'Closed Lost'</span>)
+
+<span class="c-sap">SAP_MOLD_ORDERS</span> = COUNT(*)
+  FROM sap.internal_orders   <span class="c-cmt">-- CO AUFNR，模具合同</span>
+  WHERE KUNNR = :cust_id
+    AND order_status NOT IN (<span class="c-str">'Cancelled'</span>)
+
+<span class="c-hl">IS_P1</span> = (<span class="c-crm">CRM_ACTIVE_OPP</span> > <span class="c-num">0</span>) AND (<span class="c-sap">SAP_MOLD_ORDERS</span> = <span class="c-num">0</span>)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COM-P2 -->
+  <div class="stage-card" style="animation-delay:0.08s">
+    <div class="stage-head">
+      <span class="stage-badge sb-sap">SAP AUTO</span>
+      <span class="biz-tag com">COM</span>
+      <span class="stage-name">P2 · 新客户导入</span>
+      <span class="stage-phase">破冰交付期</span>
+    </div>
+    <div class="stage-body">
+      <div class="igrid">
+        <div class="iblock">
+          <div class="ilabel">与 INT-P2 的差异</div>
+          <div class="ival">商品模不看"模具 SO"，而是看是否已<strong>转 PO（Purchase Order）</strong></div>
+        </div>
+        <div class="iblock">
+          <div class="ilabel">SAP 模块</div>
+          <div class="ival"><strong>CO 内部订单 AUFNR</strong>（模具项目）+ <strong>MM/SD 采购订单 EKKO</strong></div>
+        </div>
+      </div>
+      <div>
+        <div class="ilabel" style="margin-bottom:7px;">判定逻辑</div>
+        <div class="cb sap"><span class="c-cmt">-- COM-P2: 新客户导入判定</span>
+<span class="c-cmt">-- 条件：SAP 模具项目号 = 1 AND 该项目已产生采购订单（PO）</span>
+
+<span class="c-sap">MOLD_PROJ_COUNT</span> = COUNT(DISTINCT order_id)
+  FROM sap.internal_orders   <span class="c-cmt">-- CO AUFNR</span>
+  WHERE KUNNR = :cust_id
+    AND order_type = <span class="c-str">'MOLD'</span>
+    AND order_status NOT IN (<span class="c-str">'Cancelled'</span>)
+
+<span class="c-sap">HAS_PO</span>          = COUNT(*)
+  FROM sap.purchase_orders   <span class="c-cmt">-- EKKO/EKPO</span>
+  WHERE KUNNR = :cust_id
+    AND po_status = <span class="c-str">'Released'</span>  <span class="c-cmt">-- 已转PO（已下单，非草稿）</span>
+    AND po_type = <span class="c-str">'MOLD'</span>
+
+<span class="c-hl">IS_P2</span> = (<span class="c-sap">MOLD_PROJ_COUNT</span> = <span class="c-num">1</span>) AND (<span class="c-sap">HAS_PO</span> > <span class="c-num">0</span>)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COM-P3 -->
+  <div class="stage-card" style="animation-delay:0.11s">
+    <div class="stage-head">
+      <span class="stage-badge sb-calc">需计算</span>
+      <span class="biz-tag com">COM</span>
+      <span class="stage-name">P3 · 成长阶段</span>
+      <span class="stage-phase">份额渗透期</span>
+    </div>
+    <div class="stage-body">
+      <div class="igrid">
+        <div class="iblock">
+          <div class="ilabel">与 INT-P3 的差异</div>
+          <div class="ival">时间窗口为<strong>12 个月</strong>（INT 为 6 个月），阈值为<strong>&gt; 2 个</strong>（INT 为 ≥ 2），且无环比增长条件</div>
+        </div>
+        <div class="iblock">
+          <div class="ilabel">SAP 模块</div>
+          <div class="ival"><strong>CO 内部订单</strong>：以项目启动日期在近12月内为统计口径</div>
+        </div>
+      </div>
+      <div>
+        <div class="ilabel" style="margin-bottom:7px;">判定逻辑</div>
+        <div class="cb calc"><span class="c-cmt">-- COM-P3: 成长阶段判定（单一条件）</span>
+<span class="c-cmt">-- 条件：近12个月内模具项目号数量 > 2</span>
+
+<span class="c-calc">MOLD_PROJ_12M</span>   = COUNT(DISTINCT order_id)
+  FROM sap.internal_orders   <span class="c-cmt">-- CO AUFNR，模具项目</span>
+  WHERE KUNNR = :cust_id
+    AND start_date >= (TODAY - <span class="c-num">365</span>)
+    AND order_status NOT IN (<span class="c-str">'Cancelled'</span>)
+
+<span class="c-hl">IS_P3</span> = (<span class="c-calc">MOLD_PROJ_12M</span> > <span class="c-num">2</span>)
+<span class="c-cmt">-- 注：> 2 即 ≥ 3，与模塑一体 ≥ 2 的阈值不同，请注意区分</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COM-P4 -->
+  <div class="stage-card" style="animation-delay:0.14s">
+    <div class="stage-head">
+      <span class="stage-badge sb-calc">需计算</span>
+      <span class="biz-tag com">COM</span>
+      <span class="stage-name">P4 · 成熟阶段</span>
+      <span class="stage-phase">战略绑定期</span>
+    </div>
+    <div class="stage-body">
+      <div class="igrid">
+        <div class="iblock">
+          <div class="ilabel">与 INT-P4 的差异</div>
+          <div class="ival">商品模用<strong>自然年</strong>而非滚动月；判定逻辑为"2 个自然年均有成交"，而非 PO 连续性</div>
+        </div>
+        <div class="iblock">
+          <div class="ilabel">SAP 模块</div>
+          <div class="ival"><strong>CO 内部订单 / SD 销售订单</strong>：按自然年分组统计成交记录</div>
+        </div>
+      </div>
+      <div>
+        <div class="ilabel" style="margin-bottom:7px;">判定逻辑</div>
+        <div class="cb calc"><span class="c-cmt">-- COM-P4: 成熟阶段判定</span>
+<span class="c-cmt">-- 条件：连续2个自然年均有模具项目成交记录</span>
+<span class="c-cmt">-- 当前自然年 = YEAR(TODAY)，上一自然年 = YEAR(TODAY) - 1</span>
+
+<span class="c-calc">ORDERS_CY</span>       = COUNT(DISTINCT order_id)
+  FROM sap.internal_orders   <span class="c-cmt">-- 模具合同/内部订单</span>
+  WHERE KUNNR = :cust_id
+    AND YEAR(confirmed_date) = YEAR(TODAY)
+    AND order_status = <span class="c-str">'Confirmed'</span>
+
+<span class="c-calc">ORDERS_PY</span>       = COUNT(DISTINCT order_id)
+  FROM sap.internal_orders
+  WHERE KUNNR = :cust_id
+    AND YEAR(confirmed_date) = YEAR(TODAY) - <span class="c-num">1</span>
+    AND order_status = <span class="c-str">'Confirmed'</span>
+
+<span class="c-hl">IS_P4</span> = (<span class="c-calc">ORDERS_CY</span> > <span class="c-num">0</span>) AND (<span class="c-calc">ORDERS_PY</span> > <span class="c-num">0</span>)
+
+<span class="c-cmt">-- ⚠ 边界情况：年初（如1月）时 ORDERS_CY 极可能为0</span>
+<span class="c-cmt">-- 建议：1-2月期间采用"最近24个月内跨自然年"替代方案</span>
+<span class="c-cmt">-- 替代方案：分别检查 [TODAY-730, TODAY-365] 和 [TODAY-365, TODAY] 两个区间</span></div>
+      </div>
+      <div class="alert warn">
+        <div class="alert-icon">⚠</div>
+        <div><strong>年初边界问题：</strong>每年 1–2 月期间，ORDERS_CY 极大概率为 0，导致几乎所有客户无法被判定为 P4（成熟），产生大规模误降级。建议采用"近24个月内跨越两个自然年"替代方案，或在 1–2 月期间使用滚动24个月的判定逻辑。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COM-P6 -->
+  <div class="stage-card" style="animation-delay:0.17s">
+    <div class="stage-head">
+      <span class="stage-badge sb-dual">SAP + CRM</span>
+      <span class="biz-tag com">COM</span>
+      <span class="stage-name">P6 · 衰退阶段</span>
+      <span class="stage-phase">份额流失预警期</span>
+    </div>
+    <div class="stage-body">
+      <div class="igrid">
+        <div class="iblock">
+          <div class="ilabel">SAP 时间窗口</div>
+          <div class="ival">连续 <strong>12 个月</strong>无新成交（比 INT-P5 的6个月更长）</div>
+        </div>
+        <div class="iblock">
+          <div class="ilabel">CRM 时间窗口</div>
+          <div class="ival">近 <strong>6 个月</strong>内无新报价（RFQ），两条件均满足才触发</div>
+        </div>
+      </div>
+      <div>
+        <div class="ilabel" style="margin-bottom:7px;">判定逻辑（AND 关系）</div>
+        <div class="cb dual"><span class="c-cmt">-- COM-P6: 衰退阶段判定</span>
+
+<span class="c-cmt">-- 条件A（SAP）：连续12个月无新模具成交</span>
+<span class="c-sap">NEW_ORDERS_12M</span>  = COUNT(*)
+  FROM sap.internal_orders
+  WHERE KUNNR = :cust_id
+    AND confirmed_date >= (TODAY - <span class="c-num">365</span>)
+    AND order_status = <span class="c-str">'Confirmed'</span>
+
+<span class="c-cmt">-- 条件B（CRM）：近6个月内无新报价/RFQ</span>
+<span class="c-crm">NEW_RFQ_6M</span>       = COUNT(*)
+  FROM crm.rfq_records
+  WHERE customer_id = :cust_id
+    AND created_date >= (TODAY - <span class="c-num">180</span>)
+    AND rfq_status != <span class="c-str">'Cancelled'</span>
+
+<span class="c-hl">IS_P6</span> = (<span class="c-sap">NEW_ORDERS_12M</span> = <span class="c-num">0</span>) AND (<span class="c-crm">NEW_RFQ_6M</span> = <span class="c-num">0</span>)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COM-P7 -->
+  <div class="stage-card" style="animation-delay:0.2s">
+    <div class="stage-head">
+      <span class="stage-badge sb-sap">SAP AUTO</span>
+      <span class="biz-tag com">COM</span>
+      <span class="stage-name">P7 · 流失/赢回</span>
+      <span class="stage-phase">业务静默期</span>
+    </div>
+    <div class="stage-body">
+      <div class="igrid">
+        <div class="iblock">
+          <div class="ilabel">与 COM-P6 的差异</div>
+          <div class="ival">时间窗口延长至 <strong>18 个月</strong>，仅看 SAP 成交，不再要求 CRM 无 RFQ</div>
+        </div>
+        <div class="iblock">
+          <div class="ilabel">与 INT-P6 的差异</div>
+          <div class="ival">INT-P6 看发货记录（物流），COM-P7 看成交记录（合同），口径不同</div>
+        </div>
+      </div>
+      <div>
+        <div class="ilabel" style="margin-bottom:7px;">判定逻辑</div>
+        <div class="cb sap"><span class="c-cmt">-- COM-P7: 流失/赢回判定（最终阶段）</span>
+<span class="c-cmt">-- 条件：连续18个月无新模具成交记录</span>
+
+<span class="c-sap">NEW_ORDERS_18M</span>  = COUNT(*)
+  FROM sap.internal_orders
+  WHERE KUNNR = :cust_id
+    AND confirmed_date >= (TODAY - <span class="c-num">548</span>)   <span class="c-cmt">-- 18个月 ≈ 548天</span>
+    AND order_status = <span class="c-str">'Confirmed'</span>
+
+<span class="c-hl">IS_P7</span> = (<span class="c-sap">NEW_ORDERS_18M</span> = <span class="c-num">0</span>)
+
+<span class="c-cmt">-- 注：P7 是在 P6 条件持续满足12个月后自然演进而来</span>
+<span class="c-cmt">-- 系统应优先判定 P7，若 IS_P7=TRUE 则不再判定 P6（避免同时触发）</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══ SHARED FIELDS ═══ -->
+<div class="sec" id="shared">
+  <div class="sec-label">03</div>
+  <div class="sec-title">共用 SAP / CRM 字段清单</div>
+  <div class="sec-sub">两套业务复用的基础数据字段，建议统一封装为中台数据服务</div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:1rem;">
+    <div>
+      <div class="ilabel" style="margin-bottom:8px;">SAP 核心字段</div>
+      <table class="ftable">
+        <thead><tr><th>字段/表</th><th>含义</th><th>用于阶段</th></tr></thead>
+        <tbody>
+          <tr><td>VBAK.KUNNR</td><td>客户编号（销售订单）</td><td>全部</td></tr>
+          <tr><td>VBAP.NETWR</td><td>订单净额（金额统计）</td><td>INT-P3/P5</td></tr>
+          <tr><td>VBAK.AUDAT</td><td>订单日期（时间窗口过滤）</td><td>INT-P3/P5</td></tr>
+          <tr><td>AUFNR（CO）</td><td>内部订单号 = 模具项目号</td><td>全部</td></tr>
+          <tr><td>EKKO/EKPO</td><td>采购订单（PO），按月统计</td><td>INT-P4/P2，COM-P2</td></tr>
+          <tr><td>LIKP.WADAT_IST</td><td>实际发货日期</td><td>INT-P6</td></tr>
+          <tr><td>BSAD.AUGDT</td><td>收款清账日期（兜底）</td><td>INT-P6</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <div class="ilabel" style="margin-bottom:8px;">CRM 核心字段</div>
+      <table class="ftable" style="--sap:var(--crm);">
+        <thead><tr><th>字段</th><th>含义</th><th>用于阶段</th></tr></thead>
+        <tbody>
+          <tr><td>customer_id</td><td>客户编号（与 SAP KUNNR 映射）</td><td>全部</td></tr>
+          <tr><td>opportunities.stage</td><td>商机阶段（活跃/关闭）</td><td>INT/COM-P1</td></tr>
+          <tr><td>opportunities.opp_type</td><td>商机类型（MOLD/INJECTION）</td><td>COM-P1</td></tr>
+          <tr><td>rfq_records.created_date</td><td>RFQ 创建日期</td><td>INT-P5/P6，COM-P6</td></tr>
+          <tr><td>rfq_records.rfq_status</td><td>RFQ 状态（排除已取消）</td><td>INT-P5/P6，COM-P6</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="alert dual">
+    <div class="alert-icon">🔗</div>
+    <div><strong>客户ID映射是关键前提：</strong>SAP 的 KUNNR 与 CRM 的 customer_id 必须建立统一映射表（Customer Master Key）。所有联合判定（P1/P5/P6/COM-P6）都依赖此映射，若映射缺失或错误，将导致跨系统条件判定失败。建议在数据中台维护专用的客户主数据映射服务。</div>
+  </div>
+</div>
+
+
+<!-- ═══ FLOW ═══ -->
+<div class="sec" id="flow">
+  <div class="sec-label">04</div>
+  <div class="sec-title">阶段判定执行流程与优先级</div>
+  <div class="sec-sub">阶段之间存在包含关系，需按优先级顺序执行，命中即停止</div>
+
+  <div>
+    <div class="ilabel" style="margin-bottom:10px;">推荐判定顺序（优先级从高到低）</div>
+    <div class="cb info"><span class="c-cmt">-- 阶段判定主流程（每客户每次刷新时执行）</span>
+<span class="c-cmt">-- 规则：按顺序判定，命中第一个满足的阶段即返回，不继续往下</span>
+
+<span class="c-kw">FUNCTION</span> <span class="c-hl">detectStage</span>(customer_id, biz_type):
+
+  <span class="c-cmt">-- 0. 数据就绪检查</span>
+  <span class="c-kw">IF</span> SAP_CRM_MAPPING_EXISTS(customer_id) = FALSE:
+    <span class="c-w">RETURN</span> <span class="c-str">'DATA_ERROR'</span>   <span class="c-cmt">-- 映射缺失，无法判定</span>
+
+  <span class="c-cmt">-- 1. 最终阶段优先（P6/P7 需最先判定，避免被更宽松的条件覆盖）</span>
+  <span class="c-kw">IF</span>   biz_type = <span class="c-str">'INT'</span>  AND IS_P6(customer_id): <span class="c-kw">RETURN</span> <span class="c-str">'INT-P6'</span>
+  <span class="c-kw">ELIF</span> biz_type = <span class="c-str">'COM'</span>  AND IS_P7(customer_id): <span class="c-kw">RETURN</span> <span class="c-str">'COM-P7'</span>
+  <span class="c-kw">ELIF</span> biz_type = <span class="c-str">'COM'</span>  AND IS_P6(customer_id): <span class="c-kw">RETURN</span> <span class="c-str">'COM-P6'</span>
+
+  <span class="c-cmt">-- 2. 衰退阶段</span>
+  <span class="c-kw">ELIF</span> biz_type = <span class="c-str">'INT'</span>  AND IS_P5(customer_id): <span class="c-kw">RETURN</span> <span class="c-str">'INT-P5'</span>
+
+  <span class="c-cmt">-- 3. 成熟阶段（条件最严格，需最先在正向阶段中判定）</span>
+  <span class="c-kw">ELIF</span> biz_type = <span class="c-str">'INT'</span>  AND IS_P4(customer_id): <span class="c-kw">RETURN</span> <span class="c-str">'INT-P4'</span>
+  <span class="c-kw">ELIF</span> biz_type = <span class="c-str">'COM'</span>  AND IS_P4(customer_id): <span class="c-kw">RETURN</span> <span class="c-str">'COM-P4'</span>
+
+  <span class="c-cmt">-- 4. 成长阶段</span>
+  <span class="c-kw">ELIF</span> biz_type = <span class="c-str">'INT'</span>  AND IS_P3(customer_id): <span class="c-kw">RETURN</span> <span class="c-str">'INT-P3'</span>
+  <span class="c-kw">ELIF</span> biz_type = <span class="c-str">'COM'</span>  AND IS_P3(customer_id): <span class="c-kw">RETURN</span> <span class="c-str">'COM-P3'</span>
+
+  <span class="c-cmt">-- 5. 新客户导入</span>
+  <span class="c-kw">ELIF</span> biz_type = <span class="c-str">'INT'</span>  AND IS_P2(customer_id): <span class="c-kw">RETURN</span> <span class="c-str">'INT-P2'</span>
+  <span class="c-kw">ELIF</span> biz_type = <span class="c-str">'COM'</span>  AND IS_P2(customer_id): <span class="c-kw">RETURN</span> <span class="c-str">'COM-P2'</span>
+
+  <span class="c-cmt">-- 6. 潜在客户（最宽松，排在最后）</span>
+  <span class="c-kw">ELIF</span> IS_P1(customer_id, biz_type):              <span class="c-kw">RETURN</span> <span class="c-str">'P1'</span>
+
+  <span class="c-cmt">-- 7. 无法归类</span>
+  <span class="c-kw">ELSE</span>: <span class="c-w">RETURN</span> <span class="c-str">'UNCLASSIFIED'</span>   <span class="c-cmt">-- 如：历史档案客户，已离场但不满足P6/P7</span>
+
+<span class="c-cmt">-- 刷新触发机制：</span>
+<span class="c-cmt">-- T1: 每月月结后 T+1 工作日批量刷新所有活跃客户</span>
+<span class="c-cmt">-- T2: CRM 新建 RFQ / 商机状态变更 → 即时触发单客户重判</span>
+<span class="c-cmt">-- T3: SAP 新建订单 / 发货完成 → 即时触发单客户重判</span></div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<div style="display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:0.63rem;color:var(--text-dim);flex-wrap:wrap;gap:0.5rem;padding-bottom:1rem;">
+  <span style="color:var(--sap);">LC-STAGE · 客户生命周期阶段判定逻辑规范</span>
+  <span>优先落地：客户ID映射表 → SAP字段封装 → CRM RFQ统计接口 · 2026-04-20</span>
+</div>
+
+</div>
+</body>
+</html>
