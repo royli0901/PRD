@@ -37,6 +37,37 @@
             margin-bottom: 48px;
         }
 
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 40px;
+        }
+
+        .tab {
+            display: inline-flex;
+            align-items: center;
+            padding: 9px 14px;
+            border: 1px solid #E2E8F0;
+            border-radius: 999px;
+            background: #FFFFFF;
+            color: #475569;
+            font-size: 14px;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .tab:hover {
+            border-color: #CBD5E1;
+            color: #1E293B;
+        }
+
+        .tab.active {
+            background: #1E293B;
+            border-color: #1E293B;
+            color: #FFFFFF;
+        }
+
         .section {
             margin-bottom: 48px;
         }
@@ -121,6 +152,14 @@
     <div class="container">
         <h1>CRM 核心概念</h1>
         <p class="page-desc">名词 · 术语 · 流程 · 功能 · 计算</p>
+        <nav class="tabs" aria-label="CRM 页面导航">
+            <a class="tab active" href="index.html">CRM 核心概念</a>
+            <a class="tab" href="客户健康度方案.html">客户健康度方案</a>
+            <a class="tab" href="客户健康度演示.html">客户健康度演示</a>
+            <a class="tab" href="客户生命周期.html">客户生命周期</a>
+            <a class="tab" href="商机推进.html">商机推进</a>
+            <a class="tab" href="线索转商机.html">线索转商机</a>
+        </nav>
 
         <section class="section">
             <div class="section-head">
