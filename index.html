@@ -5,22 +5,329 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CRM 演示系统</title>
     <style>
-        body { font-family: system-ui, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; background: #f5f5f5; }
-        h1 { color: #333; }
-        ul { list-style: none; padding: 0; }
-        li { margin: 15px 0; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        a { display: block; padding: 15px 20px; text-decoration: none; color: #0066cc; font-weight: 500; }
-        a:hover { background: #f0f0f0; border-radius: 8px; }
+        :root {
+            --primary-purple: #534AB7;
+            --light-purple: #AFA9EC;
+            --primary-teal: #1D9E75;
+            --light-green: #E1F5EE;
+            --amber: #FAC775;
+            --gray-card: #F4F4F4;
+            --border-color: #E0E0E0;
+            --text-main: #333;
+            --text-sub: #666;
+            --risk-bg: #FCEBEB;
+            --risk-border: #A32D2D;
+            --risk-text: #791F1F;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 24px;
+            color: var(--text-main);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 32px;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.09);
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+            padding-bottom: 20px;
+            border-bottom: 2px dashed var(--border-color);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-purple);
+            margin: 0;
+        }
+
+        .header-badge {
+            background: var(--light-green);
+            color: var(--primary-teal);
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--primary-teal);
+        }
+
+        .module {
+            position: relative;
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 24px 20px 20px;
+            margin-bottom: 24px;
+            transition: border-color 0.2s;
+        }
+
+        .module:hover {
+            border-color: var(--light-purple);
+        }
+
+        .module-label {
+            position: absolute;
+            top: -11px;
+            left: 16px;
+            background: #fff;
+            padding: 0 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--primary-purple);
+            letter-spacing: 0.5px;
+        }
+
+        .module-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 12px;
+        }
+
+        .card {
+            background: var(--gray-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            transition: box-shadow 0.2s, transform 0.15s;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 12px rgba(83, 74, 183, 0.12);
+            transform: translateY(-1px);
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin: 0 0 4px;
+        }
+
+        .card-desc {
+            font-size: 11px;
+            color: var(--text-sub);
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .card-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+            font-size: 11px;
+            color: var(--text-sub);
+        }
+
+        .dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .dot-purple { background: var(--primary-purple); }
+        .dot-teal { background: var(--primary-teal); }
+        .dot-amber { background: var(--amber); }
+
+        .win-divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .win-divider::before,
+        .win-divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            border-top: 2px dashed var(--border-color);
+        }
+
+        .win-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--light-green);
+            color: var(--primary-teal);
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 16px;
+            border-radius: 20px;
+            border: 1px solid var(--primary-teal);
+            white-space: nowrap;
+        }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+            margin-top: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            color: var(--text-sub);
+        }
+
+        .legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .risk-card {
+            background: var(--risk-bg);
+            border: 1px solid var(--risk-border);
+            border-radius: 8px;
+            padding: 12px;
+        }
+
+        .risk-card .card-title {
+            color: var(--risk-text);
+        }
+
+        .risk-card .card-desc {
+            color: var(--risk-text);
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 11px;
+            color: var(--text-sub);
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 640px) {
+            body { padding: 12px; }
+            .container { padding: 20px 16px; }
+            .header { flex-direction: column; align-items: flex-start; gap: 8px; }
+            .module-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
-    <h1>📊 CRM 演示系统</h1>
-    <ul>
-        <li><a href="客户健康度_可落地优化方案_V4.html">客户健康度 - 可落地优化方案 V4</a></li>
-        <li><a href="客户健康度演示.html">客户健康度演示</a></li>
-        <li><a href="客户生命周期（逻辑规范）.html">客户生命周期 - 逻辑规范</a></li>
-        <li><a href="商机推进.html">商机推进</a></li>
-        <li><a href="线索转商机.html">线索转商机</a></li>
-    </ul>
+    <div class="container">
+        <div class="header">
+            <h1>CRM 演示系统</h1>
+            <span class="header-badge">5 个模块</span>
+        </div>
+
+        <div class="module">
+            <div class="module-label">客户管理</div>
+            <div class="module-grid">
+                <a href="客户健康度_可落地优化方案_V4.html" class="card" style="text-decoration:none;display:block">
+                    <div class="card-title">客户健康度 · 可落地优化方案 V4</div>
+                    <div class="card-desc">健康度评分模型、各维度详解、数据流转与落地计划</div>
+                    <div class="card-meta">
+                        <span class="dot dot-teal"></span>
+                        <span>核心模型</span>
+                    </div>
+                </a>
+                <a href="客户健康度演示.html" class="card" style="text-decoration:none;display:block">
+                    <div class="card-title">客户健康度演示</div>
+                    <div class="card-desc">健康度看板交互演示与数据可视化</div>
+                    <div class="card-meta">
+                        <span class="dot dot-amber"></span>
+                        <span>演示</span>
+                    </div>
+                </a>
+                <a href="客户生命周期（逻辑规范）.html" class="card" style="text-decoration:none;display:block">
+                    <div class="card-title">客户生命周期 · 逻辑规范</div>
+                    <div class="card-desc">模塑一体与商品模全生命周期判定流程</div>
+                    <div class="card-meta">
+                        <span class="dot dot-purple"></span>
+                        <span>规范</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="module">
+            <div class="module-label">商机管理</div>
+            <div class="module-grid">
+                <a href="商机推进.html" class="card" style="text-decoration:none;display:block">
+                    <div class="card-title">商机推进</div>
+                    <div class="card-desc">模塑一体 & 商品模业务全生命周期流程图</div>
+                    <div class="card-meta">
+                        <span class="dot dot-teal"></span>
+                        <span>流程</span>
+                    </div>
+                </a>
+                <a href="线索转商机.html" class="card" style="text-decoration:none;display:block">
+                    <div class="card-title">线索转商机</div>
+                    <div class="card-desc">线索识别、评估与转化流程</div>
+                    <div class="card-meta">
+                        <span class="dot dot-amber"></span>
+                        <span>转化</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="win-divider">
+            <span class="win-badge">核心能力</span>
+        </div>
+
+        <div class="module">
+            <div class="module-label">风险监控</div>
+            <div class="module-grid">
+                <div class="risk-card">
+                    <div class="card-title">待跟进提醒</div>
+                    <div class="card-desc">健康度低于阈值客户自动标记，推送跟进任务</div>
+                </div>
+                <div class="risk-card">
+                    <div class="card-title">生命周期预警</div>
+                    <div class="card-desc">阶段停留超时、异常流失等风险实时预警</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <span class="legend-dot" style="background:var(--primary-purple)"></span>
+                核心模型
+            </div>
+            <div class="legend-item">
+                <span class="legend-dot" style="background:var(--primary-teal)"></span>
+                流程
+            </div>
+            <div class="legend-item">
+                <span class="legend-dot" style="background:var(--amber)"></span>
+                演示
+            </div>
+            <div class="legend-item">
+                <span class="legend-dot" style="background:var(--risk-border)"></span>
+                风险监控
+            </div>
+        </div>
+
+        <div class="footer">
+            CRM 演示系统 · 内部使用
+        </div>
+    </div>
 </body>
 </html>
