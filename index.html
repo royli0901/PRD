@@ -15,120 +15,193 @@
             --border-color: #E0E0E0;
             --text-main: #333;
             --text-sub: #666;
-            --risk-bg: #FCEBEB;
-            --risk-border: #A32D2D;
-            --risk-text: #791F1F;
+            --sidebar-bg: #f8f9fa;
+            --sidebar-active: #eef2ff;
+            --sidebar-hover: #f0f4f8;
+            --content-bg: #ffffff;
         }
 
         * { box-sizing: border-box; }
 
         body {
             font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
-            background-color: #f0f2f5;
             margin: 0;
-            padding: 24px;
+            padding: 0;
+            background: #f0f2f5;
             color: var(--text-main);
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background: #fff;
-            padding: 32px;
-            border-radius: 16px;
-            box-shadow: 0 4px 24px rgba(0,0,0,0.09);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
         }
 
         .header {
+            background: var(--primary-purple);
+            color: white;
+            padding: 16px 24px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 32px;
-            padding-bottom: 20px;
-            border-bottom: 2px dashed var(--border-color);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
         .header h1 {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--primary-purple);
+            font-size: 20px;
+            font-weight: 600;
             margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .header-badge {
-            background: var(--light-green);
-            color: var(--primary-teal);
+            background: rgba(255,255,255,0.2);
+            font-size: 12px;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 240px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .sidebar-section {
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-section:last-child {
+            border-bottom: none;
+        }
+
+        .sidebar-title {
             font-size: 12px;
             font-weight: 600;
-            padding: 4px 14px;
-            border-radius: 20px;
-            border: 1px solid var(--primary-teal);
-        }
-
-        .module {
-            position: relative;
-            border: 2px dashed var(--border-color);
-            border-radius: 12px;
-            padding: 24px 20px 20px;
-            margin-bottom: 24px;
-            transition: border-color 0.2s;
-        }
-
-        .module:hover {
-            border-color: var(--light-purple);
-        }
-
-        .module-label {
-            position: absolute;
-            top: -11px;
-            left: 16px;
-            background: #fff;
-            padding: 0 8px;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--primary-purple);
+            color: var(--text-sub);
+            text-transform: uppercase;
             letter-spacing: 0.5px;
+            padding: 0 20px 8px;
+            margin: 0;
         }
 
-        .module-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 12px;
-        }
-
-        .card {
-            background: var(--gray-card);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 12px;
-            transition: box-shadow 0.2s, transform 0.15s;
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 20px;
+            text-decoration: none;
+            color: var(--text-main);
+            font-size: 14px;
+            transition: background-color 0.2s;
             cursor: pointer;
         }
 
-        .card:hover {
+        .nav-item:hover {
+            background: var(--sidebar-hover);
+        }
+
+        .nav-item.active {
+            background: var(--sidebar-active);
+            border-left: 3px solid var(--primary-purple);
+            color: var(--primary-purple);
+            font-weight: 500;
+        }
+
+        .nav-icon {
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .content-area {
+            flex: 1;
+            background: var(--content-bg);
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        .content-header {
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px dashed var(--border-color);
+        }
+
+        .content-header h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary-purple);
+            margin: 0 0 8px;
+        }
+
+        .content-header p {
+            font-size: 14px;
+            color: var(--text-sub);
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .concept-card {
+            background: var(--gray-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            transition: box-shadow 0.2s, transform 0.15s;
+        }
+
+        .concept-card:hover {
             box-shadow: 0 4px 12px rgba(83, 74, 183, 0.12);
             transform: translateY(-1px);
         }
 
-        .card-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-main);
-            margin: 0 0 4px;
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
         }
 
-        .card-desc {
-            font-size: 11px;
-            color: var(--text-sub);
+        .card-icon {
+            font-size: 18px;
+            color: var(--primary-purple);
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-main);
             margin: 0;
-            line-height: 1.5;
+        }
+
+        .card-content {
+            font-size: 13px;
+            color: var(--text-sub);
+            line-height: 1.6;
+            margin: 0;
         }
 
         .card-meta {
             display: flex;
             align-items: center;
             gap: 8px;
-            margin-top: 8px;
+            margin-top: 12px;
             font-size: 11px;
             color: var(--text-sub);
         }
@@ -144,190 +217,296 @@
         .dot-teal { background: var(--primary-teal); }
         .dot-amber { background: var(--amber); }
 
-        .win-divider {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin: 20px 0;
-        }
-
-        .win-divider::before,
-        .win-divider::after {
-            content: "";
-            flex: 1;
-            height: 1px;
-            border-top: 2px dashed var(--border-color);
-        }
-
-        .win-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
+        .rule-example {
             background: var(--light-green);
-            color: var(--primary-teal);
-            font-size: 12px;
-            font-weight: 600;
-            padding: 4px 16px;
-            border-radius: 20px;
             border: 1px solid var(--primary-teal);
-            white-space: nowrap;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 24px;
         }
 
-        .legend {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 16px;
-            padding-top: 16px;
-            border-top: 1px solid var(--border-color);
-            margin-top: 8px;
-        }
-
-        .legend-item {
+        .rule-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--primary-teal);
+            margin: 0 0 8px;
             display: flex;
             align-items: center;
             gap: 6px;
-            font-size: 11px;
-            color: var(--text-sub);
         }
 
-        .legend-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            flex-shrink: 0;
+        .rule-content {
+            font-size: 13px;
+            color: var(--text-main);
+            line-height: 1.6;
+            margin: 0;
         }
 
-        .risk-card {
-            background: var(--risk-bg);
-            border: 1px solid var(--risk-border);
+        .process-flow {
+            background: white;
+            border: 2px dashed var(--border-color);
             border-radius: 8px;
-            padding: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
         }
 
-        .risk-card .card-title {
-            color: var(--risk-text);
+        .flow-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin: 0 0 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
-        .risk-card .card-desc {
-            color: var(--risk-text);
+        .flow-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .flow-step {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: var(--gray-card);
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        .step-number {
+            background: var(--primary-purple);
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
         }
 
         .footer {
             text-align: center;
             font-size: 11px;
             color: var(--text-sub);
-            margin-top: 24px;
+            margin-top: 32px;
             padding-top: 16px;
             border-top: 1px solid var(--border-color);
         }
 
-        @media (max-width: 640px) {
-            body { padding: 12px; }
-            .container { padding: 20px 16px; }
-            .header { flex-direction: column; align-items: flex-start; gap: 8px; }
-            .module-grid { grid-template-columns: 1fr; }
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+            
+            .nav-item {
+                padding: 12px 20px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>CRM 演示系统</h1>
-            <span class="header-badge">5 个模块</span>
+    <div class="header">
+        <h1>📊 CRM 演示系统</h1>
+        <span class="header-badge">概念中心</span>
+    </div>
+
+    <div class="main-container">
+        <div class="sidebar">
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">内容分类</h3>
+                <a href="#" class="nav-item active">
+                    <span class="nav-icon">📖</span>
+                    <span>名词</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="nav-icon">📝</span>
+                    <span>定义</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="nav-icon">🔁</span>
+                    <span>流程</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="nav-icon">⚙️</span>
+                    <span>功能</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="nav-icon">🧮</span>
+                    <span>逻辑</span>
+                </a>
+            </div>
+
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">核心模块</h3>
+                <a href="客户健康度_可落地优化方案_V4.html" class="nav-item">
+                    <span class="nav-icon">📈</span>
+                    <span>客户健康度</span>
+                </a>
+                <a href="客户健康度演示.html" class="nav-item">
+                    <span class="nav-icon">👁️</span>
+                    <span>健康度演示</span>
+                </a>
+                <a href="客户生命周期（逻辑规范）.html" class="nav-item">
+                    <span class="nav-icon">🔄</span>
+                    <span>客户生命周期</span>
+                </a>
+                <a href="商机推进.html" class="nav-item">
+                    <span class="nav-icon">🚀</span>
+                    <span>商机推进</span>
+                </a>
+                <a href="线索转商机.html" class="nav-item">
+                    <span class="nav-icon">🎯</span>
+                    <span>线索转商机</span>
+                </a>
+            </div>
+
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">系统状态</h3>
+                <div class="nav-item">
+                    <span class="nav-icon">✅</span>
+                    <span>在线</span>
+                </div>
+                <div class="nav-item">
+                    <span class="nav-icon">📊</span>
+                    <span>5个模块</span>
+                </div>
+                <div class="nav-item">
+                    <span class="nav-icon">🔄</span>
+                    <span>最新更新</span>
+                </div>
+            </div>
         </div>
 
-        <div class="module">
-            <div class="module-label">客户管理</div>
-            <div class="module-grid">
-                <a href="客户健康度_可落地优化方案_V4.html" class="card" style="text-decoration:none;display:block">
-                    <div class="card-title">客户健康度 · 可落地优化方案 V4</div>
-                    <div class="card-desc">健康度评分模型、各维度详解、数据流转与落地计划</div>
-                    <div class="card-meta">
-                        <span class="dot dot-teal"></span>
-                        <span>核心模型</span>
+        <div class="content-area">
+            <div class="content-header">
+                <h2>CRM 核心概念</h2>
+                <p>客户关系管理系统中的关键术语、定义与逻辑规范</p>
+            </div>
+
+            <div class="card-grid">
+                <div class="concept-card">
+                    <div class="card-header">
+                        <span class="card-icon">📖</span>
+                        <h3 class="card-title">客户健康度</h3>
                     </div>
-                </a>
-                <a href="客户健康度演示.html" class="card" style="text-decoration:none;display:block">
-                    <div class="card-title">客户健康度演示</div>
-                    <div class="card-desc">健康度看板交互演示与数据可视化</div>
-                    <div class="card-meta">
-                        <span class="dot dot-amber"></span>
-                        <span>演示</span>
-                    </div>
-                </a>
-                <a href="客户生命周期（逻辑规范）.html" class="card" style="text-decoration:none;display:block">
-                    <div class="card-title">客户生命周期 · 逻辑规范</div>
-                    <div class="card-desc">模塑一体与商品模全生命周期判定流程</div>
+                    <p class="card-content">衡量客户关系稳定性和价值的综合评分模型，基于多维度指标评估客户状态。</p>
                     <div class="card-meta">
                         <span class="dot dot-purple"></span>
-                        <span>规范</span>
+                        <span>核心模型</span>
                     </div>
-                </a>
-            </div>
-        </div>
+                </div>
 
-        <div class="module">
-            <div class="module-label">商机管理</div>
-            <div class="module-grid">
-                <a href="商机推进.html" class="card" style="text-decoration:none;display:block">
-                    <div class="card-title">商机推进</div>
-                    <div class="card-desc">模塑一体 & 商品模业务全生命周期流程图</div>
+                <div class="concept-card">
+                    <div class="card-header">
+                        <span class="card-icon">📖</span>
+                        <h3 class="card-title">客户生命周期</h3>
+                    </div>
+                    <p class="card-content">客户从初次接触到流失的全过程阶段划分，包括模塑一体与商品模两种业务路径。</p>
                     <div class="card-meta">
                         <span class="dot dot-teal"></span>
-                        <span>流程</span>
+                        <span>流程规范</span>
                     </div>
-                </a>
-                <a href="线索转商机.html" class="card" style="text-decoration:none;display:block">
-                    <div class="card-title">线索转商机</div>
-                    <div class="card-desc">线索识别、评估与转化流程</div>
+                </div>
+
+                <div class="concept-card">
+                    <div class="card-header">
+                        <span class="card-icon">📖</span>
+                        <h3 class="card-title">商机推进</h3>
+                    </div>
+                    <p class="card-content">销售机会从识别到成交的完整流程管理，包含阶段判定、风险评估和行动规划。</p>
                     <div class="card-meta">
                         <span class="dot dot-amber"></span>
-                        <span>转化</span>
+                        <span>销售流程</span>
                     </div>
-                </a>
-            </div>
-        </div>
-
-        <div class="win-divider">
-            <span class="win-badge">核心能力</span>
-        </div>
-
-        <div class="module">
-            <div class="module-label">风险监控</div>
-            <div class="module-grid">
-                <div class="risk-card">
-                    <div class="card-title">待跟进提醒</div>
-                    <div class="card-desc">健康度低于阈值客户自动标记，推送跟进任务</div>
-                </div>
-                <div class="risk-card">
-                    <div class="card-title">生命周期预警</div>
-                    <div class="card-desc">阶段停留超时、异常流失等风险实时预警</div>
                 </div>
             </div>
-        </div>
 
-        <div class="legend">
-            <div class="legend-item">
-                <span class="legend-dot" style="background:var(--primary-purple)"></span>
-                核心模型
+            <div class="rule-example">
+                <h4 class="rule-title">📝 定义规则</h4>
+                <p class="rule-content">
+                    健康度评分 = (产品使用分 × 30%) + (互动频率分 × 25%) + (业务价值分 × 25%) + (风险预警分 × 20%)<br>
+                    生命周期阶段判定依据：最近交互时间、订单金额、产品使用深度、客户反馈等综合指标。
+                </p>
             </div>
-            <div class="legend-item">
-                <span class="legend-dot" style="background:var(--primary-teal)"></span>
-                流程
-            </div>
-            <div class="legend-item">
-                <span class="legend-dot" style="background:var(--amber)"></span>
-                演示
-            </div>
-            <div class="legend-item">
-                <span class="legend-dot" style="background:var(--risk-border)"></span>
-                风险监控
-            </div>
-        </div>
 
-        <div class="footer">
-            CRM 演示系统 · 内部使用
+            <div class="process-flow">
+                <h4 class="flow-title">🔁 典型流程</h4>
+                <div class="flow-steps">
+                    <div class="flow-step">
+                        <span class="step-number">1</span>
+                        <span>线索识别与评估</span>
+                    </div>
+                    <div class="flow-step">
+                        <span class="step-number">2</span>
+                        <span>商机创建与分级</span>
+                    </div>
+                    <div class="flow-step">
+                        <span class="step-number">3</span>
+                        <span>需求分析与方案制定</span>
+                    </div>
+                    <div class="flow-step">
+                        <span class="step-number">4</span>
+                        <span>报价与合同谈判</span>
+                    </div>
+                    <div class="flow-step">
+                        <span class="step-number">5</span>
+                        <span>成交与交付</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer">
+                CRM 演示系统 · 内部使用 · 概念中心
+            </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const navItems = document.querySelectorAll('.nav-item');
+            
+            navItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    if (this.getAttribute('href') === '#') {
+                        e.preventDefault();
+                        
+                        navItems.forEach(nav => nav.classList.remove('active'));
+                        this.classList.add('active');
+                        
+                        const icon = this.querySelector('.nav-icon').textContent;
+                        const text = this.querySelector('span:not(.nav-icon)').textContent;
+                        
+                        const contentHeader = document.querySelector('.content-header h2');
+                        const contentDesc = document.querySelector('.content-header p');
+                        
+                        const contentMap = {
+                            '📖': { title: 'CRM 核心概念', desc: '客户关系管理系统中的关键术语、定义与逻辑规范' },
+                            '📝': { title: '定义与规则', desc: '系统术语的精确定义、计算规则与判定标准' },
+                            '🔁': { title: '业务流程', desc: '标准化的操作流程、阶段划分与流转规则' },
+                            '⚙️': { title: '功能特性', desc: '系统功能模块、操作界面与交互设计' },
+                            '🧮': { title: '逻辑规范', desc: '业务逻辑、数据规则与系统算法' }
+                        };
+                        
+                        if (contentMap[icon]) {
+                            contentHeader.textContent = contentMap[icon].title;
+                            contentDesc.textContent = contentMap[icon].desc;
+                        }
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>
