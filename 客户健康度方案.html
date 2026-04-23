@@ -1,44 +1,907 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>客户健康度方案</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles/site.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>客户健康度系统 · 可落地优化方案 V4.0</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #0b0e14;
+  --bg2:      #11151e;
+  --bg3:      #171c28;
+  --bg4:      #1d2232;
+  --line:     rgba(255,255,255,0.07);
+  --line2:    rgba(255,255,255,0.13);
+  --tx:       #c8ceea;
+  --tx-dim:   #54607a;
+  --tx-mid:   #8590b4;
+  --white:    #edf0fb;
+
+  --sap:   #2dd4bf;  --sap-d: rgba(45,212,191,.1);  --sap-b: rgba(45,212,191,.28);
+  --crm:   #818cf8;  --crm-d: rgba(129,140,248,.1);  --crm-b: rgba(129,140,248,.28);
+  --calc:  #fb923c;  --calc-d:rgba(251,146,60,.1);   --calc-b:rgba(251,146,60,.28);
+  --new:   #34d399;  --new-d: rgba(52,211,153,.1);   --new-b: rgba(52,211,153,.28);
+
+  --g: #4ade80;  --g-d: rgba(74,222,128,.1);   --g-b: rgba(74,222,128,.28);
+  --y: #fbbf24;  --y-d: rgba(251,191,36,.1);    --y-b: rgba(251,191,36,.28);
+  --r: #f87171;  --r-d: rgba(248,113,113,.1);   --r-b: rgba(248,113,113,.28);
+  --bl:#60a5fa;  --bl-d:rgba(96,165,250,.1);    --bl-b:rgba(96,165,250,.28);
+
+  --mono:'JetBrains Mono',monospace;
+  --sans:'Noto Sans SC',sans-serif;
+  --rd:10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:14px}
+body{background:var(--bg);color:var(--tx);font-family:var(--sans);font-weight:300;line-height:1.75}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:200;background:rgba(11,14,20,.94);backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--line);height:48px;padding:0 1.5rem;
+    display:flex;align-items:center;overflow-x:auto;gap:0}
+.nb{font-family:var(--mono);font-size:.7rem;font-weight:700;color:var(--new);
+    letter-spacing:.08em;margin-right:1.5rem;white-space:nowrap;flex-shrink:0}
+nav a{font-size:.72rem;color:var(--tx-dim);text-decoration:none;padding:0 .85rem;
+      height:48px;display:flex;align-items:center;border-bottom:2px solid transparent;
+      transition:all .15s;white-space:nowrap}
+nav a:hover{color:var(--white);border-bottom-color:var(--line2)}
+.nv-tag{margin-left:auto;font-family:var(--mono);font-size:.62rem;font-weight:700;
+        padding:3px 10px;border-radius:20px;background:var(--new-d);color:var(--new);
+        border:1px solid var(--new-b);flex-shrink:0;white-space:nowrap}
+
+/* PAGE */
+.page{max-width:1080px;margin:0 auto;padding:2.5rem 1.5rem 6rem}
+
+/* HERO */
+.hero{padding:2.5rem 0 2rem;border-bottom:1px solid var(--line);margin-bottom:2.5rem;
+      display:grid;grid-template-columns:1fr auto;gap:2rem;align-items:end}
+.hero-eye{font-family:var(--mono);font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;
+          color:var(--tx-dim);margin-bottom:.75rem}
+h1{font-size:clamp(1.5rem,3vw,2.2rem);font-weight:700;color:var(--white);
+   line-height:1.2;letter-spacing:-.02em;margin-bottom:.6rem}
+h1 em{font-style:normal;color:var(--new)}
+.hero-sub{font-size:.85rem;color:var(--tx-mid);max-width:540px;line-height:1.8}
+.htags{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+.tag{display:inline-block;font-family:var(--mono);font-size:.62rem;font-weight:700;
+     padding:3px 10px;border-radius:4px;letter-spacing:.05em;border:1px solid;white-space:nowrap}
+.tag.v{background:var(--new-d);color:var(--new);border-color:var(--new-b)}
+.tag.d{background:var(--y-d);color:var(--y);border-color:var(--y-b)}
+
+/* SEC */
+.sec{margin-bottom:3rem;scroll-margin-top:56px}
+.slabel{font-family:var(--mono);font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;
+        color:var(--tx-dim);margin-bottom:.65rem;display:flex;align-items:center;gap:10px}
+.slabel::after{content:'';flex:1;height:1px;background:var(--line)}
+.stitle{font-size:1.1rem;font-weight:700;color:var(--white);margin-bottom:.35rem;letter-spacing:-.01em}
+.ssub{font-size:.8rem;color:var(--tx-mid);margin-bottom:1.25rem}
+
+/* CHANGE BADGE */
+.old-new{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:.7rem}
+.old-v{background:var(--r-d);color:var(--r);border:1px solid var(--r-b);padding:2px 8px;border-radius:4px;text-decoration:line-through;opacity:.7}
+.arr{color:var(--tx-dim)}
+.new-v{background:var(--g-d);color:var(--g);border:1px solid var(--g-b);padding:2px 8px;border-radius:4px;font-weight:700}
+
+/* OVERVIEW TABLE */
+.ov-table{width:100%;border-collapse:collapse;font-size:.8rem;
+          border:1px solid var(--line);border-radius:var(--rd);overflow:hidden}
+.ov-table th{background:var(--bg3);padding:9px 14px;font-family:var(--mono);font-size:.62rem;
+             letter-spacing:.08em;text-transform:uppercase;color:var(--tx-dim);text-align:left;
+             border-bottom:1px solid var(--line)}
+.ov-table td{padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top;
+             color:var(--tx-mid);line-height:1.6}
+.ov-table tr:last-child td{border-bottom:none}
+.ov-table tr:hover td{background:rgba(255,255,255,.02)}
+.ov-table td:first-child{font-family:var(--mono);font-size:.75rem;color:var(--white);
+                         font-weight:700;white-space:nowrap}
+.ov-table td:nth-child(2){white-space:nowrap}
+.src-chip{display:inline-block;font-family:var(--mono);font-size:.6rem;font-weight:700;
+          padding:2px 7px;border-radius:3px;border:1px solid;white-space:nowrap}
+.sc-sap {background:var(--sap-d);color:var(--sap);border-color:var(--sap-b)}
+.sc-crm {background:var(--crm-d);color:var(--crm);border-color:var(--crm-b)}
+.sc-mix {background:var(--calc-d);color:var(--calc);border-color:var(--calc-b)}
+.sc-new {background:var(--new-d);color:var(--new);border-color:var(--new-b)}
+.wt-chip{display:inline-flex;align-items:center;justify-content:center;
+         font-family:var(--mono);font-size:.78rem;font-weight:700;
+         width:48px;height:24px;border-radius:4px}
+.wc-hi{background:var(--sap-d);color:var(--sap);border:1px solid var(--sap-b)}
+.wc-md{background:var(--bl-d);color:var(--bl);border:1px solid var(--bl-b)}
+.wc-lo{background:var(--calc-d);color:var(--calc);border:1px solid var(--calc-b)}
+
+/* DIM CARD */
+.dcard{background:var(--bg2);border:1px solid var(--line);border-radius:var(--rd);
+       overflow:hidden;margin-bottom:1rem}
+.dcard-head{padding:13px 18px;border-bottom:1px solid var(--line);
+            display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.dim-id{font-family:var(--mono);font-size:.72rem;font-weight:700;
+        padding:3px 10px;border-radius:4px;border:1px solid;flex-shrink:0}
+.di-sap{background:var(--sap-d);color:var(--sap);border-color:var(--sap-b)}
+.di-new{background:var(--new-d);color:var(--new);border-color:var(--new-b)}
+.di-mix{background:var(--calc-d);color:var(--calc);border-color:var(--calc-b)}
+.di-crm{background:var(--crm-d);color:var(--crm);border-color:var(--crm-b)}
+.dcard-title{font-size:.95rem;font-weight:700;color:var(--white)}
+.dcard-wt{margin-left:auto;font-family:var(--mono);font-size:.65rem;font-weight:700;
+          padding:3px 10px;border-radius:4px;background:var(--bg4);
+          color:var(--tx-mid);border:1px solid var(--line2);flex-shrink:0}
+.dcard-body{padding:18px;display:flex;flex-direction:column;gap:16px}
+
+/* 5-panel */
+.panel-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.panel{background:var(--bg3);border:1px solid var(--line);border-radius:8px;padding:14px 16px}
+.panel-label{font-family:var(--mono);font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;
+             color:var(--tx-dim);margin-bottom:8px}
+.panel-body{font-size:.8rem;color:var(--tx-mid);line-height:1.7}
+.panel-body strong{color:var(--white);font-weight:500}
+.panel.story{grid-column:1/-1;border-color:var(--crm-b);background:var(--crm-d)}
+.panel.story .panel-label{color:var(--crm)}
+.panel.story .panel-body{color:#b8bff8}
+
+/* code */
+.cb{background:var(--bg);border:1px solid var(--line2);border-left:3px solid;
+    border-radius:0 6px 6px 0;padding:13px 15px;font-family:var(--mono);
+    font-size:.73rem;line-height:1.95;color:var(--tx-mid);overflow-x:auto;white-space:pre}
+.cb.sap{border-left-color:var(--sap)}
+.cb.new{border-left-color:var(--new)}
+.cb.mix{border-left-color:var(--calc)}
+.cb.info{border-left-color:var(--bl)}
+.cb.warn{border-left-color:var(--y)}
+.c-kw{color:#7dd3fc}.c-str{color:#86efac}.c-num{color:#fca5a5}
+.c-cmt{color:#333d55}.c-sap{color:var(--sap);font-weight:700}
+.c-new{color:var(--new);font-weight:700}.c-calc{color:var(--calc);font-weight:700}
+.c-hl{color:var(--white);font-weight:700}.c-w{color:var(--y)}.c-r{color:var(--r)}
+.c-crm{color:var(--crm);font-weight:700}
+
+/* alert */
+.alert{padding:11px 15px;border-radius:8px;font-size:.78rem;line-height:1.7;
+       border:1px solid;display:flex;gap:10px;align-items:flex-start}
+.alert.warn{background:var(--y-d);border-color:var(--y-b);color:#fcd34d}
+.alert.info{background:var(--bl-d);border-color:var(--bl-b);color:#93c5fd}
+.alert.good{background:var(--g-d);border-color:var(--g-b);color:#bbf7d0}
+.alert.lock{background:var(--r-d);border-color:var(--r-b);color:#fca5a5}
+.alert strong{font-weight:600}
+.ai{flex-shrink:0;margin-top:1px}
+
+/* flow */
+.flow{display:flex;align-items:center;gap:0;flex-wrap:wrap;margin:8px 0}
+.flow-node{background:var(--bg3);border:1px solid var(--line2);border-radius:6px;
+           padding:7px 14px;font-size:.76rem;color:var(--tx-mid);white-space:nowrap}
+.flow-node.sap{border-color:var(--sap-b);color:var(--sap);background:var(--sap-d)}
+.flow-node.crm{border-color:var(--crm-b);color:var(--crm);background:var(--crm-d)}
+.flow-node.mid{border-color:var(--calc-b);color:var(--calc);background:var(--calc-d)}
+.flow-node.out{border-color:var(--new-b);color:var(--new);background:var(--new-d)}
+.flow-arr{color:var(--tx-dim);font-size:1rem;padding:0 6px;flex-shrink:0}
+
+/* risk table */
+.rtable{width:100%;border-collapse:collapse;font-size:.78rem;
+        border:1px solid var(--line);border-radius:var(--rd);overflow:hidden}
+.rtable th{background:var(--bg3);padding:8px 13px;font-family:var(--mono);font-size:.6rem;
+           letter-spacing:.08em;text-transform:uppercase;color:var(--tx-dim);
+           text-align:left;border-bottom:1px solid var(--line)}
+.rtable td{padding:9px 13px;border-bottom:1px solid var(--line);
+           color:var(--tx-mid);vertical-align:top;line-height:1.6}
+.rtable tr:last-child td{border-bottom:none}
+.rtable tr:hover td{background:rgba(255,255,255,.02)}
+.rtable td:first-child{color:var(--white);font-weight:500;width:160px}
+.risk-hi{color:var(--r)!important}.risk-md{color:var(--y)!important}.risk-lo{color:var(--g)!important}
+
+/* phase cards */
+.phase-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.phase-card{background:var(--bg2);border:1px solid var(--line);border-radius:var(--rd);
+            padding:1.2rem;position:relative;overflow:hidden}
+.phase-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:var(--rd) var(--rd) 0 0}
+.phase-card.p0::before{background:var(--r)}
+.phase-card.p1::before{background:var(--y)}
+.phase-card.p2::before{background:var(--g)}
+.phase-badge{font-family:var(--mono);font-size:.62rem;font-weight:700;
+             padding:3px 9px;border-radius:20px;margin-bottom:.75rem;display:inline-block;border:1px solid}
+.phase-card.p0 .phase-badge{background:var(--r-d);color:var(--r);border-color:var(--r-b)}
+.phase-card.p1 .phase-badge{background:var(--y-d);color:var(--y);border-color:var(--y-b)}
+.phase-card.p2 .phase-badge{background:var(--g-d);color:var(--g);border-color:var(--g-b)}
+.phase-title{font-size:.88rem;font-weight:700;color:var(--white);margin-bottom:.5rem}
+.phase-time{font-family:var(--mono);font-size:.65rem;color:var(--tx-dim);margin-bottom:.75rem}
+.phase-items{list-style:none;padding:0;display:flex;flex-direction:column;gap:5px}
+.phase-items li{font-size:.76rem;color:var(--tx-mid);padding-left:14px;position:relative;line-height:1.55}
+.phase-items li::before{content:'·';position:absolute;left:0;color:var(--tx-dim)}
+.phase-items li strong{color:var(--white);font-weight:500}
+
+/* action table */
+.atable{width:100%;border-collapse:collapse;font-size:.78rem;
+        border:1px solid var(--line);border-radius:var(--rd);overflow:hidden}
+.atable th{background:var(--bg3);padding:8px 13px;font-family:var(--mono);font-size:.6rem;
+           letter-spacing:.08em;text-transform:uppercase;color:var(--tx-dim);
+           text-align:left;border-bottom:1px solid var(--line)}
+.atable td{padding:9px 13px;border-bottom:1px solid var(--line);
+           color:var(--tx-mid);vertical-align:top;line-height:1.6}
+.atable tr:last-child td{border-bottom:none}
+.atable td:first-child{font-weight:700;color:var(--white);white-space:nowrap;width:130px}
+.atable td:nth-child(2){color:var(--white)}
+.own-tag{display:inline-block;font-size:.62rem;font-family:var(--mono);font-weight:600;
+         padding:1px 7px;border-radius:3px;background:var(--calc-d);color:var(--calc);border:1px solid var(--calc-b)}
+
+/* weight compare */
+.wc-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1rem}
+.wc-card{background:var(--bg2);border:1px solid var(--line);border-radius:var(--rd);padding:1.2rem}
+.wc-title{font-size:.75rem;font-weight:700;color:var(--tx-mid);margin-bottom:.75rem;
+          display:flex;align-items:center;gap:8px}
+.wc-title span{font-family:var(--mono);font-size:.62rem;padding:2px 7px;border-radius:3px;
+               font-weight:700;border:1px solid}
+.wc-old .wc-title span{background:var(--r-d);color:var(--r);border-color:var(--r-b)}
+.wc-new .wc-title span{background:var(--g-d);color:var(--g);border-color:var(--g-b)}
+.wbar{height:8px;border-radius:4px;margin-bottom:6px;transition:width .8s ease}
+.wbar-row{margin-bottom:10px}
+.wbar-label{display:flex;justify-content:space-between;font-size:.72rem;color:var(--tx-dim);margin-bottom:4px}
+.wbar-label span:last-child{font-family:var(--mono);font-weight:700}
+.divider{height:1px;background:var(--line);margin:2.5rem 0}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.dcard{animation:fadeUp .35s ease both}
+.phase-card{animation:fadeUp .4s ease both}
+@media(max-width:760px){
+  .hero{grid-template-columns:1fr}.htags{align-items:flex-start;flex-direction:row;flex-wrap:wrap}
+  .panel-grid{grid-template-columns:1fr}.phase-grid{grid-template-columns:1fr}
+  .wc-grid{grid-template-columns:1fr}
+}
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1>客户健康度方案</h1>
-        <p class="page-desc">V4.0 · 指标权重 · 自动化 · 落地计划</p>
-        <nav class="tabs" aria-label="CRM 页面导航">
-            <a class="tab" href="index.html">CRM 核心概念</a>
-            <a class="tab active" href="客户健康度方案.html">客户健康度方案</a>
-            <a class="tab" href="客户健康度演示.html">客户健康度演示</a>
-            <a class="tab" href="客户生命周期.html">客户生命周期</a>
-            <a class="tab" href="商机阶段.html">商机阶段</a>
-            <a class="tab" href="线索转商机.html">线索转商机</a>
-        </nav>
 
-        <section class="section">
-            <div class="section-head"><span class="section-label">📌 方案概览</span><hr class="section-divider"></div>
-            <div class="card"><h3>V4.0 优化方向</h3><p>核心目标是减少人工填报、提升 SAP 自动计算占比、提升评分灵敏度，并保留必要的业务复核机制。</p></div>
-        </section>
+<nav>
+  <div class="nb">DTBP · V4.0</div>
+  <a href="#overview">优化概览</a>
+  <a href="#dims">各维度详解</a>
+  <a href="#flow">数据流转</a>
+  <a href="#launch">落地计划</a>
+  <a href="#risk">风险与应对</a>
+  <div class="nv-tag">V4.0 优化方案</div>
+</nav>
 
-        <section class="section">
-            <div class="section-head"><span class="section-label">📊 维度权重</span><hr class="section-divider"></div>
-            <div class="card"><h3>D1 回款及时率</h3><p>权重 25%，SAP 全自动，反映回款风险。</p></div>
-            <div class="card"><h3>D2 项目利润率</h3><p>权重 25%，SAP 全自动，评分从 3 档升级为 5 档。</p></div>
-            <div class="card"><h3>D3 客户活跃度</h3><p>权重 20%，替代 SOB 人工字段，使用订单活跃与同比变化自动计算。</p></div>
-            <div class="card"><h3>D4.1 / D4.2</h3><p>各 15%，保留业务确认与质量硬锁，控制主观偏差。</p></div>
-        </section>
+<div class="page">
 
-        <section class="section">
-            <div class="section-head"><span class="section-label">🗺️ 落地节奏</span><hr class="section-divider"></div>
-            <div class="card"><h3>P0（两周）</h3><p>完成 D1/D2 接口、客户 ID 映射和基础计算服务上线。</p></div>
-            <div class="card"><h3>P1（一个月）</h3><p>上线 D3 活跃度，替换 SOB 人工维护。</p></div>
-            <div class="card"><h3>P2（季度内）</h3><p>完善 D4 建议分、复核流程、培训与回测。</p></div>
-        </section>
+<!-- HERO -->
+<div class="hero">
+  <div>
+    <div class="hero-eye">客户健康度评估系统 · 可落地优化方案</div>
+    <h1>DTBP V3.0 → <em>V4.0</em><br>从"难落地"到"开箱即用"</h1>
+    <p class="hero-sub">技术负责人 + 产品经理双视角输出。人工填写字段从 5 个降至 2 个/季度，人工权重从 40% 压缩至 20%，D3/D4 全面升级为自动或半自动计算。</p>
+  </div>
+  <div class="htags">
+    <span class="tag v">V4.0 正式方案</span>
+    <span class="tag d">2026-04-20</span>
+  </div>
+</div>
+
+
+<!-- ═══ OVERVIEW ═══ -->
+<div class="sec" id="overview">
+  <div class="slabel">01</div>
+  <div class="stitle">优化后模型概览</div>
+  <div class="ssub">核心变化：人工权重 40% → 20%，评分档位 3档 → 5档，D3 替换为全自动 SAP 指标</div>
+
+  <!-- weight compare -->
+  <div class="wc-grid">
+    <div class="wc-card wc-old">
+      <div class="wc-title">V3.0 现有方案 <span>问题版</span></div>
+      <div class="wbar-row"><div class="wbar-label"><span>D1 回款及时率</span><span>20%</span></div>
+        <div class="wbar" style="width:100%;background:var(--sap);opacity:.7"></div></div>
+      <div class="wbar-row"><div class="wbar-label"><span>D2 项目利润率</span><span>20%</span></div>
+        <div class="wbar" style="width:100%;background:var(--sap);opacity:.7"></div></div>
+      <div class="wbar-row"><div class="wbar-label"><span>D3 采购份额 SOB（半自动）</span><span>20%</span></div>
+        <div class="wbar" style="width:100%;background:var(--calc)"></div></div>
+      <div class="wbar-row"><div class="wbar-label"><span>D4.1 合作稳定性（人工）</span><span>20%</span></div>
+        <div class="wbar" style="width:100%;background:var(--r);opacity:.8"></div></div>
+      <div class="wbar-row"><div class="wbar-label"><span>D4.2 技术/质量（人工）</span><span>20%</span></div>
+        <div class="wbar" style="width:100%;background:var(--r);opacity:.8"></div></div>
+      <div style="margin-top:10px;font-size:.75rem;color:var(--r);">人工填写占比 40% · 评分仅 1/3/5 三档</div>
     </div>
+    <div class="wc-card wc-new">
+      <div class="wc-title">V4.0 优化方案 <span>推荐版</span></div>
+      <div class="wbar-row"><div class="wbar-label"><span>D1 回款及时率（SAP全自动）</span><span>25%</span></div>
+        <div class="wbar" style="width:100%;background:var(--sap)"></div></div>
+      <div class="wbar-row"><div class="wbar-label"><span>D2 项目利润率（SAP全自动）</span><span>25%</span></div>
+        <div class="wbar" style="width:100%;background:var(--sap)"></div></div>
+      <div class="wbar-row"><div class="wbar-label"><span>D3 客户活跃度（SAP全自动）★新</span><span>20%</span></div>
+        <div class="wbar" style="width:100%;background:var(--new)"></div></div>
+      <div class="wbar-row"><div class="wbar-label"><span>D4.1 合作稳定性（SAP辅助+人工）</span><span>15%</span></div>
+        <div class="wbar" style="width:75%;background:var(--y)"></div></div>
+      <div class="wbar-row"><div class="wbar-label"><span>D4.2 质量表现（CRM硬锁）</span><span>15%</span></div>
+        <div class="wbar" style="width:75%;background:var(--y)"></div></div>
+      <div style="margin-top:10px;font-size:.75rem;color:var(--g);">人工填写占比 20% · 评分升至 1/2/3/4/5 五档</div>
+    </div>
+  </div>
+
+  <!-- overview table -->
+  <table class="ov-table">
+    <thead>
+      <tr><th>维度</th><th>权重</th><th>数据来源</th><th>评分档位</th><th>业务含义（一句话）</th><th>V3→V4变化</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>D1 · 回款及时率</td>
+        <td><span class="wt-chip wc-hi">25%</span></td>
+        <td><span class="src-chip sc-sap">SAP 全自动</span></td>
+        <td>连续值 0–5</td>
+        <td>钱收得回来不回来，准不准时</td>
+        <td><div class="old-new"><span class="old-v">20%</span><span class="arr">→</span><span class="new-v">25%</span></div></td>
+      </tr>
+      <tr>
+        <td>D2 · 项目利润率</td>
+        <td><span class="wt-chip wc-hi">25%</span></td>
+        <td><span class="src-chip sc-sap">SAP 全自动</span></td>
+        <td>1 / 2 / 3 / 4 / 5</td>
+        <td>这个客户做下来到底赚不赚钱</td>
+        <td><div class="old-new"><span class="old-v">20%</span><span class="arr">→</span><span class="new-v">25% + 5档</span></div></td>
+      </tr>
+      <tr>
+        <td>D3 · 客户活跃度</td>
+        <td><span class="wt-chip wc-md">20%</span></td>
+        <td><span class="src-chip sc-new">SAP 全自动 ★新</span></td>
+        <td>连续值 0–5</td>
+        <td>客户最近是不是在持续下单、一直活跃</td>
+        <td><div class="old-new"><span class="old-v">SOB人工</span><span class="arr">→</span><span class="new-v">活跃度自动</span></div></td>
+      </tr>
+      <tr>
+        <td>D4.1 · 合作稳定性</td>
+        <td><span class="wt-chip wc-lo">15%</span></td>
+        <td><span class="src-chip sc-mix">SAP辅助+人工</span></td>
+        <td>1 / 2 / 3 / 4 / 5</td>
+        <td>合作关系是深化还是在收缩</td>
+        <td><div class="old-new"><span class="old-v">40% 1/3/5</span><span class="arr">→</span><span class="new-v">15% 五档</span></div></td>
+      </tr>
+      <tr>
+        <td>D4.2 · 质量表现</td>
+        <td><span class="wt-chip wc-lo">15%</span></td>
+        <td><span class="src-chip sc-crm">CRM 硬锁</span></td>
+        <td>1 / 2 / 3 / 4 / 5</td>
+        <td>客户有没有投诉我们，投诉多不多</td>
+        <td><div class="old-new"><span class="old-v">40% 1/3/5</span><span class="arr">→</span><span class="new-v">15% 五档+硬锁</span></div></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div style="margin-top:1rem">
+    <div class="cb info"><span class="c-cmt">-- V4.0 核心计算公式（与 V3.0 结构一致，权重和档位更新）</span>
+基准分 = (D1 + D2 + D3 + D4.1 + D4.2) × <span class="c-num">4</span>   <span class="c-cmt">// 各维度最高 5 分，×4 换算为 100 分制</span>
+最终分 = 基准分 × 战略权重系数               <span class="c-cmt">// 系数：超级大象×1.2 / 大象×1.1 / 其他×1.0</span>
+
+<span class="c-cmt">// 人工填写限制：客户经理每季度仅需填写 D4.1（1个字段）+ D4.2 确认（系统预填，1次点击）</span>
+<span class="c-cmt">// D1 / D2 / D3 全部由 SAP 自动计算，无需人工干预</span></div>
+  </div>
+</div>
+
+
+<!-- ═══ DIMS ═══ -->
+<div class="sec" id="dims">
+  <div class="slabel">02</div>
+  <div class="stitle">各维度详解</div>
+  <div class="ssub">5个维度逐一拆解：计算公式、业务故事、可行性评估、数据来源</div>
+
+  <!-- D1 -->
+  <div class="dcard" style="animation-delay:.04s">
+    <div class="dcard-head">
+      <span class="dim-id di-sap">SAP 全自动</span>
+      <span class="dcard-title">D1 · 回款及时率</span>
+      <div class="old-new" style="margin-left:8px"><span class="old-v">20%</span><span class="arr">→</span><span class="new-v">25%</span></div>
+      <span class="dcard-wt">权重 25% · 连续值评分</span>
+    </div>
+    <div class="dcard-body">
+      <div class="panel-grid">
+        <div class="panel">
+          <div class="panel-label">业务含义（业务人员语言）</div>
+          <div class="panel-body">这个指标回答一个最基本的问题：<strong>我们把货发出去、把模具交付了，钱能不能按时收回来？</strong>超过30天没收到的款项代表催款风险，超过60天则代表坏账风险。</div>
+        </div>
+        <div class="panel">
+          <div class="panel-label">数据来源与可行性</div>
+          <div class="panel-body">来自 <strong>SAP 应收账款账龄报表</strong>，每月月结后系统自动推送。<strong>现有系统完全支持，零开发成本</strong>，仅需配置定时导出接口。</div>
+        </div>
+        <div class="panel story">
+          <div class="panel-label">业务故事举例</div>
+          <div class="panel-body">客户 A 总账期 100 万，其中 20 万超过 30 天未还、5 万超过 60 天未还。超30天比例 = 20%，超60天比例 = 5%。原始分 = 100 − 20×10 − 5×20 = 0 分。意味着这个客户的回款风险已到临界点，D1 = 0。</div>
+        </div>
+      </div>
+      <div>
+        <div style="font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--tx-dim);margin-bottom:7px;">计算公式（含V4.0升级：权重25%）</div>
+        <div class="cb sap"><span class="c-cmt">-- D1 回款及时率（V4.0 权重提升至 25%）</span>
+<span class="c-cmt">-- 数据来源：SAP 应收账款账龄报表，每月自动推送</span>
+
+超30天比例 = 逾期30-60天应收余额 / 该客户总应收余额 × 100   <span class="c-cmt">（%）</span>
+超60天比例 = 逾期60天以上应收余额 / 该客户总应收余额 × 100  <span class="c-cmt">（%）</span>
+
+<span class="c-cmt">-- 互锁约束：超60天不得大于超30天</span>
+<span class="c-kw">ASSERT</span>: 超60天比例 ≤ 超30天比例
+
+<span class="c-sap">D1原始分</span> = <span class="c-kw">MAX</span>(0,  100 - 超30天比例 × 10 - 超60天比例 × 20  )
+<span class="c-sap">D1得分</span>   = D1原始分 / 20     <span class="c-cmt">→ 取值范围 [0, 5]，连续值，非阶梯</span>
+<span class="c-sap">D1贡献</span>   = D1得分 × 4 × 战略权重  <span class="c-cmt">→ 满分贡献 20 分</span>
+
+<span class="c-cmt">-- 边界处理：总应收为零时（新客户/无业务期），D1得分 = 5（满分，视为无风险）</span>
+<span class="c-kw">IF</span> 总应收余额 = 0: D1得分 = <span class="c-num">5.0</span></div>
+      </div>
+      <div class="alert good">
+        <div class="ai">✓</div>
+        <div><strong>权重提升理由：</strong>D1 是唯一纯财务安全指标，且完全由 SAP 客观数据驱动。在人工指标权重压缩后，将其从 20% 提升至 25% 符合"提高客观指标话语权"的优化目标，同时补偿了 D3 替换带来的结构变化。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- D2 -->
+  <div class="dcard" style="animation-delay:.07s">
+    <div class="dcard-head">
+      <span class="dim-id di-sap">SAP 全自动</span>
+      <span class="dcard-title">D2 · 项目利润率</span>
+      <div class="old-new" style="margin-left:8px"><span class="old-v">20% 3档</span><span class="arr">→</span><span class="new-v">25% 5档</span></div>
+      <span class="dcard-wt">权重 25% · 1–5分五档</span>
+    </div>
+    <div class="dcard-body">
+      <div class="panel-grid">
+        <div class="panel">
+          <div class="panel-label">业务含义（业务人员语言）</div>
+          <div class="panel-body">这个指标回答：<strong>这个客户的项目赚钱吗？赚多少？</strong>不同业务类型（模塑一体 vs 商品模）利润基准不同，系统自动根据客户类型切换评分阈值。</div>
+        </div>
+        <div class="panel">
+          <div class="panel-label">V4.0 关键升级：增加中间档</div>
+          <div class="panel-body">原来只有1/3/5三档，<strong>新增 2分档和 4分档</strong>，使利润率微小变化也能反映在得分上，避免"利润从25%降到20.1%得分完全不变"的问题。</div>
+        </div>
+        <div class="panel story">
+          <div class="panel-label">业务故事举例</div>
+          <div class="panel-body">模塑一体客户 B，过去12个月综合毛利率 22%，落在 20%–25% 区间，D2 = 4分。上季度因原材料涨价，毛利率降至 18.5%，落入 15%–20% 区间，D2 降为 3分，健康度自动下调，触发成本工程师复盘。</div>
+        </div>
+      </div>
+      <div>
+        <div style="font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--tx-dim);margin-bottom:7px;">评分规则（5档）</div>
+        <div class="cb sap"><span class="c-cmt">-- D2 项目利润率（V4.0 新增 2/4 档，提升敏感度）</span>
+<span class="c-cmt">-- 数据来源：SAP 项目结算表，滚动12个月加权平均毛利率</span>
+
+综合毛利率 = Σ(各项目毛利额) / Σ(各项目收入) × 100  <span class="c-cmt">（%，滚动12月）</span>
+
+<span class="c-kw">IF</span> BIZ_TYPE = <span class="c-str">'模塑一体'</span>:
+  毛利率 > 25%              → D2 = <span class="c-num">5</span>  <span class="c-cmt">（超额利润，优质）</span>
+  22% &lt; 毛利率 ≤ 25%       → D2 = <span class="c-num">4</span>  <span class="c-cmt">（良好）★新增档</span>
+  18% &lt; 毛利率 ≤ 22%       → D2 = <span class="c-num">3</span>  <span class="c-cmt">（正常）</span>
+  15% &lt; 毛利率 ≤ 18%       → D2 = <span class="c-num">2</span>  <span class="c-cmt">（偏低）★新增档</span>
+  毛利率 ≤ 15%              → D2 = <span class="c-num">1</span>  <span class="c-cmt">（告警）</span>
+
+<span class="c-kw">IF</span> BIZ_TYPE = <span class="c-str">'商品模'</span>:
+  毛利率 > 35%              → D2 = <span class="c-num">5</span>
+  30% &lt; 毛利率 ≤ 35%       → D2 = <span class="c-num">4</span>  <span class="c-cmt">★新增档</span>
+  24% &lt; 毛利率 ≤ 30%       → D2 = <span class="c-num">3</span>
+  20% &lt; 毛利率 ≤ 24%       → D2 = <span class="c-num">2</span>  <span class="c-cmt">★新增档</span>
+  毛利率 ≤ 20%              → D2 = <span class="c-num">1</span>
+
+<span class="c-cmt">-- 异常处理：项目数不足3个时，加注"数据不足"标记，得分仍计算但标黄提示</span>
+<span class="c-kw">IF</span> 滚动12月项目数 &lt; 3: 标记 D2_DATA_WARNING = TRUE</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- D3 NEW -->
+  <div class="dcard" style="animation-delay:.10s">
+    <div class="dcard-head">
+      <span class="dim-id di-new">SAP 全自动 ★全新</span>
+      <span class="dcard-title">D3 · 客户活跃度指数</span>
+      <div class="old-new" style="margin-left:8px"><span class="old-v">SOB人工</span><span class="arr">→</span><span class="new-v">活跃度自动</span></div>
+      <span class="dcard-wt">权重 20% · 连续值评分</span>
+    </div>
+    <div class="dcard-body">
+      <div class="alert info" style="margin-bottom:0">
+        <div class="ai">★</div>
+        <div><strong>为什么替换 D3？</strong>原 SOB（客户口袋占比）需要人工维护"客户市场总采购额"，这个数字难以获取、更新滞后，客户经理普遍抗拒填写，已成为系统落地最大阻力。新 D3「客户活跃度」完全基于 SAP 已有数据自动计算，零人工干预。</div>
+      </div>
+      <div class="panel-grid">
+        <div class="panel">
+          <div class="panel-label">业务含义（业务人员语言）</div>
+          <div class="panel-body">这个指标回答：<strong>客户近期是不是一直在跟我们做生意？</strong>综合看三件事：最近有没有在下单、下单频率稳不稳定、下单金额有没有在增长。三者加权合成一个"活跃度分"。</div>
+        </div>
+        <div class="panel">
+          <div class="panel-label">数据来源与可行性</div>
+          <div class="panel-body">全部来自 <strong>SAP 销售订单和发货记录</strong>，系统现有数据，<strong>无需任何人工录入</strong>。开发成本：仅需封装3个 SAP 查询逻辑，约1–2个工作日。</div>
+        </div>
+        <div class="panel story">
+          <div class="panel-label">业务故事举例</div>
+          <div class="panel-body">客户 C，近6个月每月都有发货（月均活跃 = 满分），PO 连续12个月（连续性满分），但金额同比下降8%（增长率得2分）。活跃度综合分 = 4.2，接近优质水平，D3 = 4.2。</div>
+        </div>
+      </div>
+      <div>
+        <div style="font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--tx-dim);margin-bottom:7px;">计算公式（三子项加权）</div>
+        <div class="cb new"><span class="c-cmt">-- D3 客户活跃度指数（V4.0 全新，替代人工 SOB）</span>
+<span class="c-cmt">-- 由三个子指标加权合成，全部来自 SAP，无人工干预</span>
+
+<span class="c-cmt">-- 子项 A：近6个月月均活跃率（权重 40%）</span>
+<span class="c-cmt">-- 含义：近6个月里，每个月都有发货或有 PO 的比例</span>
+活跃月数   = 近6个月中，有发货记录或有PO的月份数   <span class="c-cmt">（最大=6）</span>
+A得分      = (活跃月数 / 6) × 5                     <span class="c-cmt">→ 取值 [0, 5]</span>
+
+<span class="c-cmt">-- 子项 B：PO 连续稳定性（权重 40%）</span>
+<span class="c-cmt">-- 含义：过去12个月，有几个月有PO（连续性越高越好）</span>
+连续PO月数 = 过去12个月中，有采购订单的月份数       <span class="c-cmt">（最大=12）</span>
+B得分      = (连续PO月数 / 12) × 5                  <span class="c-cmt">→ 取值 [0, 5]</span>
+
+<span class="c-cmt">-- 子项 C：采购金额同比变化（权重 20%）</span>
+<span class="c-cmt">-- 含义：今年比去年同期多还是少</span>
+金额同比变化% = (近12月金额 - 前12月金额) / 前12月金额 × 100
+C得分 = <span class="c-kw">CASE</span>
+  <span class="c-kw">WHEN</span> 金额同比变化% >  15  : <span class="c-num">5</span>  <span class="c-cmt">（明显增长）</span>
+  <span class="c-kw">WHEN</span> 金额同比变化% >   0  : <span class="c-num">4</span>  <span class="c-cmt">（小幅增长）</span>
+  <span class="c-kw">WHEN</span> 金额同比变化% >  -10 : <span class="c-num">3</span>  <span class="c-cmt">（基本持平）</span>
+  <span class="c-kw">WHEN</span> 金额同比变化% >  -20 : <span class="c-num">2</span>  <span class="c-cmt">（小幅下降）</span>
+  <span class="c-kw">ELSE</span>                       : <span class="c-num">1</span>  <span class="c-cmt">（明显下降）</span>
+<span class="c-kw">END</span>
+
+<span class="c-cmt">-- 合成 D3 得分</span>
+<span class="c-new">D3得分</span> = A得分 × 0.4 + B得分 × 0.4 + C得分 × 0.2   <span class="c-cmt">→ 取值 [0, 5]</span>
+
+<span class="c-cmt">-- 边界处理：新客户（前12月无数据），C得分默认3分（中性），标注"历史数据不足"</span>
+<span class="c-kw">IF</span> 前12月金额 = 0: C得分 = <span class="c-num">3</span>, 标记 D3_NEW_CUSTOMER = TRUE</div>
+      </div>
+      <div class="alert good">
+        <div class="ai">✓</div>
+        <div><strong>业务合理性：</strong>活跃度指数比"口袋份额"更直接反映当下的合作健康程度。一个 SOB 很高但近期订单断档的客户，活跃度指数会立刻降低并触发预警；而 SOB 指标因数据滞后，可能数月后才能反映问题。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- D4.1 -->
+  <div class="dcard" style="animation-delay:.13s">
+    <div class="dcard-head">
+      <span class="dim-id di-mix">SAP辅助+人工</span>
+      <span class="dcard-title">D4.1 · 合作稳定性</span>
+      <div class="old-new" style="margin-left:8px"><span class="old-v">20% 3档</span><span class="arr">→</span><span class="new-v">15% 五档</span></div>
+      <span class="dcard-wt">权重 15% · 1–5分五档</span>
+    </div>
+    <div class="dcard-body">
+      <div class="alert warn" style="margin-bottom:0">
+        <div class="ai">⚠</div>
+        <div><strong>V4.0 关键改进：</strong>SAP 自动生成"建议分值"，<strong>客户经理只需确认或微调（±1档），无需从零填写</strong>。若实际填写与系统建议差距超过1档，自动触发销售经理复核。人工操作从"主动填写"变为"被动确认"，阻力大幅降低。</div>
+      </div>
+      <div class="panel-grid">
+        <div class="panel">
+          <div class="panel-label">业务含义（业务人员语言）</div>
+          <div class="panel-body">这个指标看：<strong>我们和这个客户的合作是在加深还是在收缩？</strong>新项目在增加、还是已经多年没有新动作了？</div>
+        </div>
+        <div class="panel">
+          <div class="panel-label">为什么保留人工？</div>
+          <div class="panel-body">SAP 看到的是历史数据，但客户经理知道<strong>未来的信号</strong>，例如"客户已口头确认明年新项目"或"总监已离职、关系需要重建"。这些信息只有人知道，因此保留人工微调权。</div>
+        </div>
+        <div class="panel story">
+          <div class="panel-label">业务故事举例</div>
+          <div class="panel-body">系统根据 SAP 数据建议 D4.1 = 3分（稳定存量）。但客户经理知道上月刚签了两个新模合同（尚未在 SAP 入账），将其调整为 4分，并备注"新模合同参考单号 XXX"。调整幅度在允许范围（±1档），无需复核。</div>
+        </div>
+      </div>
+      <div>
+        <div style="font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--tx-dim);margin-bottom:7px;">SAP自动建议值 + 人工确认规则</div>
+        <div class="cb mix"><span class="c-cmt">-- D4.1 合作稳定性（V4.0：SAP建议 + 人工微调，权重降至15%）</span>
+
+<span class="c-cmt">-- Step 1: SAP 自动计算建议分值</span>
+近6月新项目数  = COUNT(近6个月内新启动的项目号，来自SAP)
+PO连续月数     = 过去12个月有PO的月份数（来自SAP）
+近6月有无发货  = SAP 发货记录是否为空
+
+<span class="c-cmt">-- 建议分值规则（系统自动生成，展示给客户经理）</span>
+建议分 = <span class="c-kw">CASE</span>
+  <span class="c-kw">WHEN</span> 近6月新项目数 >= 2                     : <span class="c-num">5</span>  <span class="c-cmt">（强势增长）</span>
+  <span class="c-kw">WHEN</span> 近6月新项目数 = 1                       : <span class="c-num">4</span>  <span class="c-cmt">（稳步推进）</span>
+  <span class="c-kw">WHEN</span> PO连续月数 >= 10 AND 近6月新项目数 = 0  : <span class="c-num">3</span>  <span class="c-cmt">（稳定存量）</span>
+  <span class="c-kw">WHEN</span> PO连续月数 BETWEEN 6 AND 9             : <span class="c-num">2</span>  <span class="c-cmt">（轻度萎缩）</span>
+  <span class="c-kw">WHEN</span> 近6月有无发货 = FALSE                   : <span class="c-num">1</span>  <span class="c-cmt">（业务停滞）</span>
+<span class="c-kw">END</span>
+
+<span class="c-cmt">-- Step 2: 客户经理确认/微调（每季度一次，仅需操作1次）</span>
+实际D4.1 = 客户经理填写值   <span class="c-cmt">（允许在建议分 ±1档内自行调整）</span>
+
+<span class="c-cmt">-- Step 3: 差异检查（超过1档差异触发复核）</span>
+<span class="c-kw">IF</span> ABS(实际D4.1 - 建议分) > 1:
+  → D4_1_REASON 字段变为<span class="c-w">必填</span>（填写调整原因，如"新合同尚未入账"）
+  → D4_1_APPROVED_BY 字段变为<span class="c-w">必填</span>（销售经理签字确认）</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- D4.2 -->
+  <div class="dcard" style="animation-delay:.16s">
+    <div class="dcard-head">
+      <span class="dim-id di-crm">CRM 硬锁</span>
+      <span class="dcard-title">D4.2 · 质量表现</span>
+      <div class="old-new" style="margin-left:8px"><span class="old-v">20% 3档</span><span class="arr">→</span><span class="new-v">15% 五档+硬锁</span></div>
+      <span class="dcard-wt">权重 15% · 1–5分五档</span>
+    </div>
+    <div class="dcard-body">
+      <div class="panel-grid">
+        <div class="panel">
+          <div class="panel-label">业务含义（业务人员语言）</div>
+          <div class="panel-body">这个指标问：<strong>客户投诉我们多不多？严不严重？</strong>没有客诉最好；有客诉但不严重、属于偶发，可以接受；反复投诉或有严重质量事故，就要拉响警报了。</div>
+        </div>
+        <div class="panel">
+          <div class="panel-label">V4.0 关键升级：准自动化</div>
+          <div class="panel-body">系统每季度从 <strong>CRM 客诉工单模块</strong>自动统计数量和等级，<strong>生成预填分值</strong>。客诉 ≥ 3 单强制锁定为 1分，无需人工干预，消除"人情分"。</div>
+        </div>
+        <div class="panel story">
+          <div class="panel-label">业务故事举例</div>
+          <div class="panel-body">客户 D 本季度有 2 张客诉工单，均为轻微缺陷已关闭。系统预填 D4.2 = 3分，客户经理看了一眼确认，全流程不到30秒。若有1张为重大质量事故，系统直接锁定 1分，客户经理无法修改。</div>
+        </div>
+      </div>
+      <div>
+        <div style="font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--tx-dim);margin-bottom:7px;">系统自动评分 + 客诉硬锁规则（强制保留）</div>
+        <div class="cb mix"><span class="c-cmt">-- D4.2 质量表现（V4.0：五档细化 + 硬锁加强，权重降至15%）</span>
+<span class="c-cmt">-- 数据来源：CRM 客诉工单模块，按客户编号统计近6个月</span>
+
+<span class="c-cmt">-- Step 1: 系统自动统计（每季度触发）</span>
+客诉总数       = CRM近6个月该客户名下客诉工单数
+重大客诉数     = 其中严重级别标记为"重大"或"停线"的工单数
+重复缺陷数     = 同一缺陷类型在近6个月内出现 ≥ 2 次的工单数
+
+<span class="c-cmt">-- Step 2: 硬锁规则（不可被人工覆盖，强制锁定）</span>
+<span class="c-kw">IF</span> 客诉总数 >= <span class="c-num">3</span>  OR  重大客诉数 >= <span class="c-num">1</span>  OR  重复缺陷数 >= <span class="c-num">1</span>:
+  <span class="c-r">强制锁定 D4.2 = 1</span>   <span class="c-cmt">← 任何人无法修改，包括销售经理</span>
+
+<span class="c-cmt">-- Step 3: 非锁定情况下的五档评分（系统预填，人工确认）</span>
+预填分值 = <span class="c-kw">CASE</span>
+  <span class="c-kw">WHEN</span> 客诉总数 = 0                     : <span class="c-num">5</span>  <span class="c-cmt">（零客诉，优质）</span>
+  <span class="c-kw">WHEN</span> 客诉总数 = 1 AND 均为轻微客诉     : <span class="c-num">4</span>  <span class="c-cmt">（偶发轻微）</span>
+  <span class="c-kw">WHEN</span> 客诉总数 = 2 AND 均为轻微客诉     : <span class="c-num">3</span>  <span class="c-cmt">（有待改善）</span>
+  <span class="c-kw">WHEN</span> 客诉总数 = 2 AND 有中等级别       : <span class="c-num">2</span>  <span class="c-cmt">（较差）</span>
+  <span class="c-cmt">-- 注：硬锁条件未触发时不会出现1分，1分由硬锁专用</span>
+<span class="c-kw">END</span>
+
+<span class="c-cmt">-- Step 4: 客户经理点击"确认"即完成（无需文字输入，仅需确认预填值）</span>
+<span class="c-cmt">-- 若不同意预填值，可在非硬锁范围内调整，需填写原因（必填字段）</span></div>
+      </div>
+      <div class="alert lock">
+        <div class="ai">🔒</div>
+        <div><strong>客诉硬锁机制（必须保留，不可妥协）：</strong>这是整个 D4.2 客观性的最后防线。若取消硬锁，客户经理可以无限给问题客户打高分，导致健康度系统完全失去公信力。建议在系统层面通过数据库约束（而非前端校验）实现，防止任何技术绕过。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══ DATA FLOW ═══ -->
+<div class="sec" id="flow">
+  <div class="slabel">03</div>
+  <div class="stitle">数据流转路径</div>
+  <div class="ssub">SAP → 中台数据服务 → CRM 健康度模块，三段式流转</div>
+
+  <div style="display:flex;flex-direction:column;gap:20px">
+
+    <div>
+      <div style="font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--tx-dim);margin-bottom:10px;">每月月结后（T+1工作日）自动触发</div>
+      <div class="flow">
+        <div class="flow-node sap">SAP FI-AR<br><span style="font-size:.65rem;opacity:.7">应收账款账龄</span></div>
+        <div class="flow-arr">→</div>
+        <div class="flow-node mid">中台 API<br><span style="font-size:.65rem;opacity:.7">字段封装推送</span></div>
+        <div class="flow-arr">→</div>
+        <div class="flow-node out">D1 回款得分<br><span style="font-size:.65rem;opacity:.7">自动写入CRM</span></div>
+      </div>
+      <div class="flow" style="margin-top:8px">
+        <div class="flow-node sap">SAP CO/PS<br><span style="font-size:.65rem;opacity:.7">项目结算毛利</span></div>
+        <div class="flow-arr">→</div>
+        <div class="flow-node mid">中台 API<br><span style="font-size:.65rem;opacity:.7">BIZ_TYPE驱动阈值</span></div>
+        <div class="flow-arr">→</div>
+        <div class="flow-node out">D2 利润得分<br><span style="font-size:.65rem;opacity:.7">自动写入CRM</span></div>
+      </div>
+      <div class="flow" style="margin-top:8px">
+        <div class="flow-node sap">SAP SD/MM<br><span style="font-size:.65rem;opacity:.7">订单·发货·PO记录</span></div>
+        <div class="flow-arr">→</div>
+        <div class="flow-node mid">中台 计算服务<br><span style="font-size:.65rem;opacity:.7">活跃度三子项合成</span></div>
+        <div class="flow-arr">→</div>
+        <div class="flow-node out">D3 活跃度得分<br><span style="font-size:.65rem;opacity:.7">自动写入CRM</span></div>
+      </div>
+    </div>
+
+    <div>
+      <div style="font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--tx-dim);margin-bottom:10px;">每季度人工确认流程（客户经理操作）</div>
+      <div class="flow">
+        <div class="flow-node sap">SAP 项目/PO数据</div>
+        <div class="flow-arr">→</div>
+        <div class="flow-node mid">中台计算<br><span style="font-size:.65rem;opacity:.7">生成建议分</span></div>
+        <div class="flow-arr">→</div>
+        <div class="flow-node crm">CRM 推送<br><span style="font-size:.65rem;opacity:.7">展示建议值+确认按钮</span></div>
+        <div class="flow-arr">→</div>
+        <div class="flow-node out">D4.1 最终得分<br><span style="font-size:.65rem;opacity:.7">人工确认后写入</span></div>
+      </div>
+      <div class="flow" style="margin-top:8px">
+        <div class="flow-node crm">CRM 客诉工单<br><span style="font-size:.65rem;opacity:.7">近6个月统计</span></div>
+        <div class="flow-arr">→</div>
+        <div class="flow-node mid">硬锁判断<br><span style="font-size:.65rem;opacity:.7">≥3单锁定1分</span></div>
+        <div class="flow-arr">→</div>
+        <div class="flow-node crm">预填分值展示<br><span style="font-size:.65rem;opacity:.7">客户经理一键确认</span></div>
+        <div class="flow-arr">→</div>
+        <div class="flow-node out">D4.2 最终得分<br><span style="font-size:.65rem;opacity:.7">确认后写入</span></div>
+      </div>
+    </div>
+
+    <div>
+      <div style="font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--tx-dim);margin-bottom:10px;">汇总计算（D4确认后自动触发）</div>
+      <div class="flow">
+        <div class="flow-node out">D1+D2+D3+D4.1+D4.2</div>
+        <div class="flow-arr">→</div>
+        <div class="flow-node mid">× 4 × 战略权重</div>
+        <div class="flow-arr">→</div>
+        <div class="flow-node out">最终健康度分</div>
+        <div class="flow-arr">→</div>
+        <div class="flow-node" style="border-color:var(--r-b);color:var(--r);background:var(--r-d)">RED/YELLOW/GREEN<br><span style="font-size:.65rem;opacity:.7">推送通知</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:1rem">
+    <div class="cb info"><span class="c-cmt">-- 完整重算流程伪代码</span>
+<span class="c-kw">FUNCTION</span> <span class="c-hl">recalcHealth</span>(customer_id, trigger_source):
+
+  <span class="c-cmt">// ① SAP自动计算部分（月度触发）</span>
+  <span class="c-sap">d1</span> = MAX(0, 100 - ar_o30%×10 - ar_o60%×20) / 20
+  <span class="c-sap">d2</span> = getProfitScore(proj_gross_margin, biz_type)   <span class="c-cmt">// 五档</span>
+  <span class="c-new">d3</span> = (activityScore_A×0.4 + activityScore_B×0.4 + activityScore_C×0.2)
+
+  <span class="c-cmt">// ② 人工确认部分（季度触发，建议值已预填）</span>
+  <span class="c-calc">d4_1</span> = crm.getConfirmedScore('D4_1', customer_id)   <span class="c-cmt">// 人工确认值</span>
+  <span class="c-calc">d4_2</span> = crm.getLockedOrConfirmedScore('D4_2', customer_id)  <span class="c-cmt">// 硬锁优先</span>
+
+  <span class="c-cmt">// ③ 汇总</span>
+  base  = (d1 + d2 + d3 + d4_1 + d4_2) × 4
+  final = base × strategic_weight
+
+  <span class="c-cmt">// ④ 状态映射 + 推送</span>
+  status = final >= 80 ? <span class="c-str">'GREEN'</span> : final >= 60 ? <span class="c-str">'YELLOW'</span> : <span class="c-str">'RED'</span>
+  <span class="c-kw">IF</span> status = <span class="c-str">'RED'</span>: notify(sales_director, customer_id)
+  saveSnapshot(customer_id, final, status, trigger_source, NOW())</div>
+  </div>
+</div>
+
+
+<!-- ═══ LAUNCH ═══ -->
+<div class="sec" id="launch">
+  <div class="slabel">04</div>
+  <div class="stitle">落地优先级与行动清单</div>
+  <div class="ssub">分三阶段上线，P0 两周内可完成，P1 一个月，P2 季度内完成</div>
+
+  <div class="phase-grid" style="margin-bottom:1.5rem">
+    <div class="phase-card p0" style="animation-delay:.04s">
+      <div class="phase-badge">P0 · 必须做</div>
+      <div class="phase-title">基础自动化层</div>
+      <div class="phase-time">目标：2 周内上线 · 零人工干预</div>
+      <ul class="phase-items">
+        <li><strong>D1</strong>：配置 SAP 账龄报表定时推送接口</li>
+        <li><strong>D2</strong>：配置 SAP 项目结算数据推送接口，增加 2/4 分档</li>
+        <li>客户 ID 映射表（SAP KUNNR ↔ CRM ID）上线</li>
+        <li>中台计算服务部署（D1/D2 公式封装）</li>
+        <li>结果写入 CRM 健康度快照表</li>
+      </ul>
+    </div>
+    <div class="phase-card p1" style="animation-delay:.08s">
+      <div class="phase-badge">P1 · 重要</div>
+      <div class="phase-title">D3 客户活跃度上线</div>
+      <div class="phase-time">目标：1 个月内 · 替代人工 SOB</div>
+      <ul class="phase-items">
+        <li><strong>D3</strong> 三子项计算逻辑开发（活跃月数、PO连续性、金额同比）</li>
+        <li>SAP 发货/PO 数据接口封装</li>
+        <li>D3 结果自动写入 CRM，替代原 SOB 字段</li>
+        <li>下线 D3_MARKET_WALLET 人工填写字段</li>
+        <li>权重调整：D1/D2 提至 25%，D3 设为 20%</li>
+      </ul>
+    </div>
+    <div class="phase-card p2" style="animation-delay:.12s">
+      <div class="phase-badge">P2 · 完善</div>
+      <div class="phase-title">D4 辅助建议 + 季度流程</div>
+      <div class="phase-time">目标：季度内 · 人工填写最简化</div>
+      <ul class="phase-items">
+        <li><strong>D4.1</strong> SAP 建议值自动生成，推送到 CRM 待确认</li>
+        <li><strong>D4.2</strong> CRM 客诉工单统计自动化，硬锁逻辑用数据库约束实现</li>
+        <li>D4 确认界面优化：一键确认 + 仅在差异超档时弹出原因框</li>
+        <li>季度提醒推送（90天有效期提醒）</li>
+        <li>销售经理复核工作流（差异 &gt;1档时触发）</li>
+      </ul>
+    </div>
+  </div>
+
+  <table class="atable">
+    <thead><tr><th>行动项</th><th>具体内容</th><th>负责人</th><th>优先级</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>SAP接口对接</td>
+        <td>封装 D1（账龄）、D2（利润）、D3（订单/发货/PO）三类 SAP 数据接口，月度批量推送至中台</td>
+        <td><span class="own-tag">技术</span></td>
+        <td><span style="color:var(--r);font-weight:700">P0</span></td>
+      </tr>
+      <tr>
+        <td>客户ID映射</td>
+        <td>建立 SAP KUNNR ↔ CRM customer_id 统一映射表，所有跨系统计算依赖此映射</td>
+        <td><span class="own-tag">技术</span></td>
+        <td><span style="color:var(--r);font-weight:700">P0</span></td>
+      </tr>
+      <tr>
+        <td>权重配置化</td>
+        <td>将各维度权重存入配置表而非硬编码，允许管理员在不发版的情况下调整权重</td>
+        <td><span class="own-tag">产品</span></td>
+        <td><span style="color:var(--r);font-weight:700">P0</span></td>
+      </tr>
+      <tr>
+        <td>D3 活跃度</td>
+        <td>三子项计算逻辑开发，下线人工 SOB 字段，通知客户经理无需再维护"市场总采购额"</td>
+        <td><span class="own-tag">技术</span></td>
+        <td><span style="color:var(--y);font-weight:700">P1</span></td>
+      </tr>
+      <tr>
+        <td>D4 建议值推送</td>
+        <td>D4.1/D4.2 系统自动生成建议分值，CRM 中展示"建议 X 分 · 点击确认"的简化确认界面</td>
+        <td><span class="own-tag">产品+技术</span></td>
+        <td><span style="color:var(--y);font-weight:700">P1</span></td>
+      </tr>
+      <tr>
+        <td>硬锁数据库约束</td>
+        <td>D4.2 硬锁通过数据库触发器实现，而非仅前端校验，防止 API 绕过</td>
+        <td><span class="own-tag">技术</span></td>
+        <td><span style="color:var(--y);font-weight:700">P1</span></td>
+      </tr>
+      <tr>
+        <td>业务培训</td>
+        <td>向客户经理宣讲"V4.0 你每季度只需点 2 次确认按钮"，消除抗拒心理</td>
+        <td><span class="own-tag">产品</span></td>
+        <td><span style="color:var(--g);font-weight:700">P2</span></td>
+      </tr>
+      <tr>
+        <td>数据回测</td>
+        <td>用历史12个月数据跑 V4.0 模型，对比 V3.0 结果，向业务展示哪些客户评级有变化及原因</td>
+        <td><span class="own-tag">数据分析</span></td>
+        <td><span style="color:var(--g);font-weight:700">P2</span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+
+<!-- ═══ RISK ═══ -->
+<div class="sec" id="risk">
+  <div class="slabel">05</div>
+  <div class="stitle">风险与应对</div>
+  <div class="ssub">预测推行阻力，提前准备应对话术与技术兜底方案</div>
+
+  <table class="rtable" style="margin-bottom:1.5rem">
+    <thead><tr><th>风险点</th><th>风险等级</th><th>具体描述</th><th>应对策略</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>D3 切换后得分骤变</td>
+        <td><span class="risk-hi">高</span></td>
+        <td>从 SOB 换成活跃度指数，同一客户的 D3 得分可能大幅变化，业务方质疑模型可信度</td>
+        <td>P2 阶段先做数据回测，提前向业务展示变化原因，选取3–5个典型案例说明新指标更合理；切换后首季度并行展示新旧两个 D3 分值</td>
+      </tr>
+      <tr>
+        <td>SAP 接口数据质量</td>
+        <td><span class="risk-hi">高</span></td>
+        <td>SAP 项目主数据可能有历史遗留的脏数据（如未关闭的废弃项目号），导致 D3 计数虚高</td>
+        <td>在 D3 计算时过滤 project_status = 'Cancelled/Inactive' 的记录；上线前与 SAP 管理员核对数据质量，必要时做一次历史数据清洗</td>
+      </tr>
+      <tr>
+        <td>客户经理拒绝确认</td>
+        <td><span class="risk-md">中</span></td>
+        <td>即使改为"点击确认"，部分客户经理仍可能拖延、不处理，导致 D4 数据90天到期失效</td>
+        <td>到期前7天发送系统提醒；到期当天推送销售经理；超期3天后 D4 自动降为建议值（不再等待人工），防止数据空白</td>
+      </tr>
+      <tr>
+        <td>硬锁被认为不公平</td>
+        <td><span class="risk-md">中</span></td>
+        <td>销售经理抱怨"客诉是质量部门的问题，凭什么影响我的客户评分"</td>
+        <td>在业务培训中明确：D4.2 反映的是客户关系健康度，而非追责个人KPI。同时提供"申诉通道"——销售VP可在特殊情况下（如客诉已全部结案）解锁一次，但需留审计记录</td>
+      </tr>
+      <tr>
+        <td>年初 P4 误降级</td>
+        <td><span class="risk-lo">低</span></td>
+        <td>D2 利润率若采用自然年口径，每年 1–2 月项目数据不足，可能导致利润率偏低</td>
+        <td>D2 使用滚动12个月口径（非自然年），消除年初数据不足问题；并在数据少于3个项目时加注"数据不足"标记而非影响评分</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="alert good">
+    <div class="ai">✓</div>
+    <div><strong>推行成功关键：</strong>V4.0 的最大卖点是"<strong>客户经理每季度只需操作 2 次</strong>"——D4.1 确认 + D4.2 确认，其余全自动。在第一次业务宣讲时，务必用这句话开场，而不是讲技术架构。业务人员关心的是"我要多做多少工作"，而不是"系统多么先进"。</div>
+  </div>
+</div>
+
+<div class="divider"></div>
+<div style="display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:.63rem;color:var(--tx-dim);flex-wrap:wrap;gap:.5rem;padding-bottom:1rem">
+  <span style="color:var(--new)">DTBP V4.0 · 可落地优化方案</span>
+  <span>P0 优先：SAP接口+客户ID映射 → P1：D3活跃度+D4建议值 → P2：业务培训+数据回测 · 2026-04-20</span>
+</div>
+
+</div>
 </body>
 </html>

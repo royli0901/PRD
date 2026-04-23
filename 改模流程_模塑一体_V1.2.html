@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>报价管理 · 模塑一体业务 · 改模流程 V1.2</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f4f6fa; --bg2:#ffffff; --bg3:#f8fafc; --bg4:#edf1f7;
+  --line:rgba(0,0,0,.08); --line2:rgba(0,0,0,.15);
+  --tx:#1a2340; --tx-mid:#4a5578; --tx-dim:#8494b4;
+  --orange:#e07b2a; --orange-d:rgba(224,123,42,.1); --orange-b:rgba(224,123,42,.3);
+  --blue:#2563eb;   --blue-d:rgba(37,99,235,.1);    --blue-b:rgba(37,99,235,.3);
+  --teal:#0ea5a0;   --teal-d:rgba(14,165,160,.1);   --teal-b:rgba(14,165,160,.3);
+  --green:#16a34a;  --green-d:rgba(22,163,74,.1);   --green-b:rgba(22,163,74,.3);
+  --red:#dc2626;    --red-d:rgba(220,38,38,.1);     --red-b:rgba(220,38,38,.3);
+  --gray:#64748b;   --gray-d:rgba(100,116,139,.1);  --gray-b:rgba(100,116,139,.3);
+  --purple:#7c3aed; --purple-d:rgba(124,58,237,.1); --purple-b:rgba(124,58,237,.3);
+  --sans:'Noto Sans SC',sans-serif; --mono:'JetBrains Mono',monospace;
+  --shadow:0 1px 4px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.05);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:14px} body{background:var(--bg);color:var(--tx);font-family:var(--sans);font-weight:300;line-height:1.7}
+.page{max-width:1120px;margin:0 auto;padding:2rem 1.5rem 5rem}
+
+.doc-header{background:#fff;border-radius:14px;padding:1.75rem 2rem;margin-bottom:1.25rem;
+  box-shadow:var(--shadow);border-left:5px solid var(--orange);
+  display:grid;grid-template-columns:1fr auto;gap:1rem;align-items:start}
+.doc-title{font-size:1.35rem;font-weight:700;color:var(--tx);margin-bottom:.25rem}
+.doc-sub{font-size:.82rem;color:var(--tx-mid)}
+.doc-meta{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.meta-tag{font-family:var(--mono);font-size:.62rem;font-weight:700;padding:3px 10px;
+  border-radius:4px;border:1.5px solid;white-space:nowrap}
+.mt-o{background:var(--orange-d);color:var(--orange);border-color:var(--orange-b)}
+.mt-g{background:var(--gray-d);color:var(--gray);border-color:var(--gray-b)}
+
+.tabs{display:flex;gap:6px;margin-bottom:1.25rem}
+.tab-btn{font-size:.8rem;font-weight:500;padding:7px 20px;border-radius:8px;
+  border:1.5px solid var(--line2);background:#fff;color:var(--tx-mid);
+  cursor:pointer;transition:all .15s;box-shadow:var(--shadow)}
+.tab-btn.active{background:var(--orange);color:#fff;border-color:var(--orange);font-weight:700}
+.tab-btn:not(.active):hover{background:var(--bg4);color:var(--tx)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+.chip{display:inline-block;font-size:.6rem;font-weight:700;padding:1px 7px;
+  border-radius:3px;border:1.5px solid;white-space:nowrap;vertical-align:middle;margin:1px}
+.chip.o{background:var(--orange-d);color:var(--orange);border-color:var(--orange-b)}
+.chip.b{background:var(--blue-d);color:var(--blue);border-color:var(--blue-b)}
+.chip.t{background:var(--teal-d);color:var(--teal);border-color:var(--teal-b)}
+.chip.g{background:var(--green-d);color:var(--green);border-color:var(--green-b)}
+.chip.p{background:var(--purple-d);color:var(--purple);border-color:var(--purple-b)}
+.chip.gr{background:var(--gray-d);color:var(--gray);border-color:var(--gray-b)}
+.chip.r{background:var(--red-d);color:var(--red);border-color:var(--red-b)}
+
+.tag{display:inline-block;font-size:.6rem;font-weight:700;padding:1px 6px;
+  border-radius:3px;border:1.5px solid;vertical-align:middle;margin-left:4px}
+.tag.warn{background:#fef3c7;color:#b45309;border-color:#fde68a}
+.tag.info{background:var(--blue-d);color:var(--blue);border-color:var(--blue-b)}
+.tag.core{background:var(--red-d);color:var(--red);border-color:var(--red-b)}
+
+.alert{padding:10px 14px;border-radius:8px;border:1.5px solid;font-size:.78rem;
+  line-height:1.7;display:flex;gap:9px;align-items:flex-start}
+.alert.warn{background:#fffbeb;border-color:#fde68a;color:#b45309}
+.alert.info{background:#eff6ff;border-color:#bfdbfe;color:#1d4ed8}
+.alert.good{background:#f0fdf4;border-color:#bbf7d0;color:#15803d}
+.alert strong{font-weight:700}
+.ai{flex-shrink:0;margin-top:1px}
+
+.doc-card{background:#fff;border-radius:12px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:1rem}
+.dc-head{padding:11px 18px;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:10px;background:var(--bg3)}
+.dc-num{width:27px;height:27px;border-radius:50%;background:var(--orange);color:#fff;
+  font-family:var(--mono);font-size:.7rem;font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.dc-title{font-size:.88rem;font-weight:700;color:var(--tx)}
+.dc-body{padding:16px 18px}
+
+.rtable{width:100%;border-collapse:collapse;font-size:.79rem}
+.rtable th{background:var(--bg3);padding:8px 12px;text-align:left;font-weight:700;
+  color:var(--tx-mid);border-bottom:1.5px solid var(--line)}
+.rtable td{padding:9px 12px;border-bottom:1px solid var(--line);color:var(--tx-mid);
+  vertical-align:top;line-height:1.6}
+.rtable tr:last-child td{border-bottom:none}
+.rtable tr:hover td{background:var(--bg3)}
+.rtable td:first-child{color:var(--tx);font-weight:500}
+
+.branch-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.branch-card{border-radius:10px;border:1.5px solid;padding:13px 15px}
+.branch-card.self{background:var(--blue-d);border-color:var(--blue-b)}
+.branch-card.client{background:var(--orange-d);border-color:var(--orange-b)}
+.branch-title{font-size:.82rem;font-weight:700;margin-bottom:.5rem}
+.branch-card.self .branch-title{color:var(--blue)}
+.branch-card.client .branch-title{color:var(--orange)}
+.branch-steps{list-style:none;padding:0;display:flex;flex-direction:column;gap:5px}
+.branch-steps li{font-size:.76rem;color:var(--tx-mid);padding-left:14px;position:relative;line-height:1.55}
+.branch-steps li::before{content:'→';position:absolute;left:0;color:var(--tx-dim)}
+.branch-steps li strong{color:var(--tx);font-weight:500}
+
+.amount-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.amount-card{background:#fff;border-radius:8px;border:1.5px solid var(--line);padding:12px 14px}
+.amount-head{font-family:var(--mono);font-size:.7rem;font-weight:700;margin-bottom:6px}
+.amount-card.lt .amount-head{color:var(--green)}
+.amount-card.gte .amount-head{color:var(--purple)}
+.amount-steps{list-style:none;padding:0;display:flex;flex-direction:column;gap:4px}
+.amount-steps li{font-size:.74rem;color:var(--tx-mid);padding-left:12px;position:relative;line-height:1.5}
+.amount-steps li::before{content:'·';position:absolute;left:0;font-size:1rem;color:var(--tx-dim);top:-2px}
+.amount-steps li strong{color:var(--tx);font-weight:600}
+
+.ver-table{width:100%;border-collapse:collapse;font-size:.78rem;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.ver-table th{background:var(--bg3);padding:8px 12px;text-align:left;font-weight:700;color:var(--tx-dim);border-bottom:1px solid var(--line)}
+.ver-table td{padding:8px 12px;border-bottom:1px solid var(--line);color:var(--tx-mid)}
+.ver-table tr:last-child td{border-bottom:none}
+
+@media(max-width:700px){
+  .branch-grid,.amount-grid,.doc-header{grid-template-columns:1fr}
+  .doc-meta{align-items:flex-start}
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- HEADER -->
+<div class="doc-header">
+  <div>
+    <div class="doc-title">报价管理 · 模塑一体业务 · 改模流程</div>
+    <div class="doc-sub">Quotation Management — Integrated Molding — Mold Change Process &nbsp;·&nbsp; V1.2 修正：SO/PO 时序逻辑更新</div>
+  </div>
+  <div class="doc-meta">
+    <span class="meta-tag mt-o">V1.2 · 2026-04-22</span>
+    <span class="meta-tag mt-g">东江 / 内部文件</span>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="setTab('flow',this)">流程图</button>
+  <button class="tab-btn" onclick="setTab('doc',this)">流程说明文档</button>
+</div>
+
+<!-- ══ FLOW TAB ══ -->
+<div class="tab-panel active" id="tab-flow">
+<div style="background:#fff;border-radius:14px;box-shadow:var(--shadow);overflow:hidden">
+
+  <div style="padding:13px 20px;background:var(--orange);color:#fff;font-size:.9rem;font-weight:700;display:flex;align-items:center;justify-content:space-between">
+    <span>改模流程泳道图 — 模塑一体业务 V1.2</span>
+    <span style="font-size:.75rem;font-weight:400;opacity:.85">SO = 销售订单（内部作业授权）· PO = 客户采购订单（付款依据）</span>
+  </div>
+
+  <!-- column headers -->
+  <div style="display:grid;grid-template-columns:80px repeat(6,1fr);border-bottom:2px solid var(--orange)">
+    <div style="padding:9px 6px;text-align:center;font-size:.68rem;font-weight:700;color:var(--orange);background:#fff8f3;border-right:1px solid var(--line)">阶段</div>
+    <div style="padding:9px 6px;text-align:center;font-size:.68rem;font-weight:700;color:var(--teal);background:var(--teal-d);border-right:1px solid var(--line)">注塑BU<br>模具工程师</div>
+    <div style="padding:9px 6px;text-align:center;font-size:.68rem;font-weight:700;color:var(--orange);background:var(--orange-d);border-right:1px solid var(--line)">注塑<br>项目工程师</div>
+    <div style="padding:9px 6px;text-align:center;font-size:.68rem;font-weight:700;color:var(--blue);background:var(--blue-d);border-right:1px solid var(--line)">精密模具<br>项目工程师</div>
+    <div style="padding:9px 6px;text-align:center;font-size:.68rem;font-weight:700;color:var(--blue);background:var(--blue-d);border-right:1px solid var(--line)">精密模具<br>模具工程师</div>
+    <div style="padding:9px 6px;text-align:center;font-size:.68rem;font-weight:700;color:var(--purple);background:var(--purple-d);border-right:1px solid var(--line)">成本工程师<br>（报价中心）</div>
+    <div style="padding:9px 6px;text-align:center;font-size:.68rem;font-weight:700;color:var(--green);background:var(--green-d)">客户经理<br>（营销中心）</div>
+  </div>
+
+  <div style="overflow-x:auto">
+  <svg viewBox="0 0 1120 980" xmlns="http://www.w3.org/2000/svg"
+       style="width:100%;min-width:820px;display:block;background:#fff;font-family:'Noto Sans SC',sans-serif">
+    <defs>
+      <marker id="a"  markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3z" fill="#94a3b8"/></marker>
+      <marker id="ao" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3z" fill="#e07b2a"/></marker>
+      <marker id="ab" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3z" fill="#2563eb"/></marker>
+      <marker id="ag" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3z" fill="#16a34a"/></marker>
+      <marker id="at" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3z" fill="#0ea5a0"/></marker>
+      <marker id="ap" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3z" fill="#7c3aed"/></marker>
+    </defs>
+
+    <!-- lane dividers -->
+    <line x1="80"  y1="0" x2="80"  y2="980" stroke="#e2e8f0" stroke-width="1"/>
+    <line x1="253" y1="0" x2="253" y2="980" stroke="#e2e8f0" stroke-width="1"/>
+    <line x1="426" y1="0" x2="426" y2="980" stroke="#e2e8f0" stroke-width="1"/>
+    <line x1="599" y1="0" x2="599" y2="980" stroke="#e2e8f0" stroke-width="1"/>
+    <line x1="772" y1="0" x2="772" y2="980" stroke="#e2e8f0" stroke-width="1"/>
+    <line x1="945" y1="0" x2="945" y2="980" stroke="#e2e8f0" stroke-width="1"/>
+    <rect x="0" y="0" width="80" height="980" fill="#fff8f3"/>
+
+    <!-- PHASE LABELS -->
+    <text x="40" y="88"  text-anchor="middle" font-size="11" font-weight="700" fill="#e07b2a">设变</text>
+    <text x="40" y="102" text-anchor="middle" font-size="11" font-weight="700" fill="#e07b2a">需求</text>
+    <text x="40" y="116" text-anchor="middle" font-size="11" font-weight="700" fill="#e07b2a">发起</text>
+    <line x1="10" y1="145" x2="70" y2="145" stroke="#fbd0a8" stroke-width="1" stroke-dasharray="3,2"/>
+
+    <text x="40" y="230" text-anchor="middle" font-size="11" font-weight="700" fill="#e07b2a">方案</text>
+    <text x="40" y="244" text-anchor="middle" font-size="11" font-weight="700" fill="#e07b2a">制定</text>
+    <line x1="10" y1="320" x2="70" y2="320" stroke="#fbd0a8" stroke-width="1" stroke-dasharray="3,2"/>
+
+    <text x="40" y="400" text-anchor="middle" font-size="11" font-weight="700" fill="#e07b2a">归因</text>
+    <text x="40" y="414" text-anchor="middle" font-size="11" font-weight="700" fill="#e07b2a">判断</text>
+    <line x1="10" y1="490" x2="70" y2="490" stroke="#fbd0a8" stroke-width="1" stroke-dasharray="3,2"/>
+
+    <text x="40" y="545" text-anchor="middle" font-size="11" font-weight="700" fill="#e07b2a">收费</text>
+    <text x="40" y="559" text-anchor="middle" font-size="11" font-weight="700" fill="#e07b2a">确认</text>
+    <line x1="10" y1="615" x2="70" y2="615" stroke="#fbd0a8" stroke-width="1" stroke-dasharray="3,2"/>
+
+    <text x="40" y="685" text-anchor="middle" font-size="11" font-weight="700" fill="#e07b2a">下达</text>
+    <text x="40" y="699" text-anchor="middle" font-size="11" font-weight="700" fill="#e07b2a">SO</text>
+    <line x1="10" y1="760" x2="70" y2="760" stroke="#fbd0a8" stroke-width="1" stroke-dasharray="3,2"/>
+
+    <text x="40" y="830" text-anchor="middle" font-size="11" font-weight="700" fill="#e07b2a">跟进</text>
+    <text x="40" y="844" text-anchor="middle" font-size="11" font-weight="700" fill="#e07b2a">PO</text>
+
+    <!-- ══ START ══ -->
+    <circle cx="167" cy="28" r="13" fill="#0ea5a0"/>
+    <text x="167" y="32" text-anchor="middle" font-size="9.5" font-weight="700" fill="white">开始</text>
+    <line x1="167" y1="41" x2="167" y2="56" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#a)"/>
+
+    <!-- ① 发起设变需求 -->
+    <rect x="100" y="57" width="134" height="40" rx="7" fill="#e0f7f6" stroke="#99e6e3" stroke-width="1.5"/>
+    <text x="167" y="73" text-anchor="middle" font-size="11" font-weight="700" fill="#0c7370">① 收集并发起</text>
+    <text x="167" y="87" text-anchor="middle" font-size="10" fill="#0c7370">设变需求（OA发起）</text>
+    <circle cx="230" cy="57" r="8" fill="#0ea5a0"/><text x="230" y="61" text-anchor="middle" font-size="9" font-weight="700" fill="white">1</text>
+
+    <!-- OA → 精密 -->
+    <line x1="234" y1="77" x2="510" y2="77" stroke="#0ea5a0" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#at)"/>
+    <text x="370" y="70" text-anchor="middle" font-size="9" font-weight="700" fill="#0ea5a0">OA 流转</text>
+    <line x1="167" y1="97" x2="167" y2="136" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#a)"/>
+    <text x="167" y="120" text-anchor="middle" font-size="9" fill="#64748b" font-style="italic">（仅发起，不判断归因）</text>
+    <rect x="100" y="137" width="134" height="30" rx="6" fill="#f1fafa" stroke="#99e6e3" stroke-width="1"/>
+    <text x="167" y="149" text-anchor="middle" font-size="9.5" fill="#0c7370">发起后不介入</text>
+    <text x="167" y="161" text-anchor="middle" font-size="9" fill="#0ea5a0">归因由注塑项目工程师裁决</text>
+
+    <!-- 精密 接收 -->
+    <line x1="512" y1="97" x2="512" y2="135" stroke="#2563eb" stroke-width="1.5" marker-end="url(#ab)"/>
+    <rect x="443" y="136" width="138" height="40" rx="7" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
+    <text x="512" y="152" text-anchor="middle" font-size="11" font-weight="700" fill="#1d4ed8">② 接收OA需求</text>
+    <text x="512" y="166" text-anchor="middle" font-size="10" fill="#1e40af">协调模具工程师评估</text>
+    <circle cx="577" cy="136" r="8" fill="#2563eb"/><text x="577" y="140" text-anchor="middle" font-size="9" font-weight="700" fill="white">2</text>
+    <line x1="581" y1="156" x2="640" y2="156" stroke="#2563eb" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#ab)"/>
+
+    <!-- 模具工程师评估 -->
+    <rect x="617" y="136" width="138" height="40" rx="7" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
+    <text x="686" y="152" text-anchor="middle" font-size="11" font-weight="700" fill="#1d4ed8">③ 技术评估</text>
+    <text x="686" y="166" text-anchor="middle" font-size="10" fill="#1e40af">工时 · 可行性分析</text>
+    <circle cx="751" cy="136" r="8" fill="#2563eb"/><text x="751" y="140" text-anchor="middle" font-size="9" font-weight="700" fill="white">3</text>
+
+    <!-- 合并 → 方案 -->
+    <line x1="686" y1="176" x2="686" y2="200" stroke="#2563eb" stroke-width="1.5" marker-end="url(#ab)"/>
+    <line x1="512" y1="176" x2="512" y2="215" stroke="#94a3b8" stroke-width="1.5"/>
+    <line x1="512" y1="215" x2="649" y2="215" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#a)"/>
+    <rect x="530" y="201" width="310" height="48" rx="7" fill="#dbeafe" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="685" y="219" text-anchor="middle" font-size="11" font-weight="700" fill="#1d4ed8">④ 制定改模方案</text>
+    <text x="685" y="233" text-anchor="middle" font-size="10" fill="#1e40af">DFM · 改模工时（小时）· 改模时间（天）· 造价估算</text>
+    <text x="685" y="243" text-anchor="middle" font-size="9" fill="#3b82f6">精密模具项目工程师 + 模具工程师协同输出</text>
+    <circle cx="836" cy="201" r="8" fill="#2563eb"/><text x="836" y="205" text-anchor="middle" font-size="9" font-weight="700" fill="white">4</text>
+
+    <!-- 方案 → 注塑项目 -->
+    <line x1="685" y1="249" x2="685" y2="268" stroke="#94a3b8" stroke-width="1.5"/>
+    <line x1="685" y1="268" x2="370" y2="268" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#a)"/>
+    <text x="530" y="262" text-anchor="middle" font-size="9" fill="#64748b">方案完成，提交裁判</text>
+
+    <!-- ⑤ 归因判断 -->
+    <polygon points="339,270 384,320 339,370 294,320" fill="#fff7ed" stroke="#fed7aa" stroke-width="2"/>
+    <text x="339" y="316" text-anchor="middle" font-size="10.5" font-weight="700" fill="#c2410c">⑤ 自改</text>
+    <text x="339" y="330" text-anchor="middle" font-size="10.5" font-weight="700" fill="#c2410c">or 客改？</text>
+    <circle cx="382" cy="270" r="8" fill="#e07b2a"/><text x="382" y="274" text-anchor="middle" font-size="9" font-weight="700" fill="white">5</text>
+    <rect x="280" y="378" width="120" height="32" rx="5" fill="#fff7ed" stroke="#fde68a" stroke-width="1"/>
+    <text x="340" y="391" text-anchor="middle" font-size="8.5" fill="#b45309">注塑项目工程师</text>
+    <text x="340" y="402" text-anchor="middle" font-size="8.5" font-weight="700" fill="#b45309">裁决为最终结论</text>
+
+    <!-- ══ 自改分支 ══ -->
+    <line x1="294" y1="320" x2="200" y2="320" stroke="#2563eb" stroke-width="1.5" marker-end="url(#ab)"/>
+    <text x="246" y="313" text-anchor="middle" font-size="9" font-weight="700" fill="#2563eb">自改</text>
+
+    <!-- 自改：直接下SO（在注塑项目工程师泳道内） -->
+    <rect x="108" y="300" width="130" height="44" rx="7" fill="#dbeafe" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="173" y="316" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1d4ed8">⑥ 直接下达 SO</text>
+    <text x="173" y="330" text-anchor="middle" font-size="9" fill="#1e40af">费用自担</text>
+    <text x="173" y="341" text-anchor="middle" font-size="9" fill="#1e40af">无需客户 PO</text>
+    <circle cx="234" cy="300" r="8" fill="#2563eb"/><text x="234" y="304" text-anchor="middle" font-size="9" font-weight="700" fill="white">6A</text>
+
+    <!-- 自改 → 精密 改模 -->
+    <line x1="173" y1="344" x2="173" y2="400" stroke="#2563eb" stroke-width="1.5"/>
+    <line x1="173" y1="400" x2="510" y2="400" stroke="#2563eb" stroke-width="1.5" marker-end="url(#ab)"/>
+    <text x="340" y="393" text-anchor="middle" font-size="9" font-weight="700" fill="#2563eb">SO授权，安排改模</text>
+
+    <!-- 自改 完成 -->
+    <rect x="443" y="381" width="138" height="38" rx="7" fill="#dbeafe" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="512" y="397" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1d4ed8">精密模具中心改模</text>
+    <text x="512" y="409" text-anchor="middle" font-size="9.5" fill="#1e40af">凭SO开项目号运作</text>
+    <circle cx="577" cy="381" r="8" fill="#2563eb"/><text x="577" y="385" text-anchor="middle" font-size="9" font-weight="700" fill="white">7A</text>
+
+    <circle cx="512" cy="450" r="13" fill="#2563eb"/>
+    <text x="512" y="446" text-anchor="middle" font-size="8.5" font-weight="700" fill="white">改模</text>
+    <text x="512" y="457" text-anchor="middle" font-size="8.5" font-weight="700" fill="white">完成</text>
+    <line x1="512" y1="419" x2="512" y2="437" stroke="#2563eb" stroke-width="1.5" marker-end="url(#ab)"/>
+
+    <!-- ══ 客改分支 ══ -->
+    <line x1="339" y1="370" x2="339" y2="435" stroke="#e07b2a" stroke-width="1.5" marker-end="url(#ao)"/>
+    <text x="354" y="406" text-anchor="middle" font-size="9" font-weight="700" fill="#e07b2a">客改</text>
+
+    <!-- ⑥B 确认收费归属 -->
+    <rect x="274" y="436" width="130" height="52" rx="7" fill="#fff7ed" stroke="#fed7aa" stroke-width="1.5"/>
+    <text x="339" y="453" text-anchor="middle" font-size="10.5" font-weight="700" fill="#c2410c">⑥ 确认收费归属</text>
+    <text x="339" y="467" text-anchor="middle" font-size="9" fill="#92400e">注塑项目工程师（主责）</text>
+    <text x="339" y="479" text-anchor="middle" font-size="9" fill="#92400e">或精密项目工程师（效率）</text>
+    <circle cx="401" cy="436" r="8" fill="#e07b2a"/><text x="401" y="440" text-anchor="middle" font-size="9" font-weight="700" fill="white">6B</text>
+
+    <!-- 书面记录说明 -->
+    <rect x="440" y="441" width="148" height="38" rx="5" fill="#fffbeb" stroke="#fde68a" stroke-width="1"/>
+    <text x="514" y="455" text-anchor="middle" font-size="8.5" fill="#b45309">⚠ 书面记录必留</text>
+    <text x="514" y="467" text-anchor="middle" font-size="8" fill="#92400e">邮件/微信确认费用归属</text>
+    <text x="514" y="477" text-anchor="middle" font-size="8" fill="#92400e">及金额（≥1万须确认报价）</text>
+
+    <line x1="339" y1="488" x2="339" y2="520" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#a)"/>
+
+    <!-- ⑦ 金额判断 -->
+    <polygon points="339,521 384,561 339,601 294,561" fill="#faf5ff" stroke="#ddd6fe" stroke-width="2"/>
+    <text x="339" y="557" text-anchor="middle" font-size="10.5" font-weight="700" fill="#7c3aed">⑦ 金额</text>
+    <text x="339" y="571" text-anchor="middle" font-size="10.5" font-weight="700" fill="#7c3aed">≥ 1万？</text>
+    <circle cx="382" cy="521" r="8" fill="#7c3aed"/><text x="382" y="525" text-anchor="middle" font-size="9" font-weight="700" fill="white">7</text>
+
+    <!-- ≥ 1万 → 下 → 报价中心 -->
+    <line x1="339" y1="601" x2="339" y2="636" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#ap)"/>
+    <text x="356" y="622" text-anchor="middle" font-size="9" font-weight="700" fill="#7c3aed">≥ 1万</text>
+
+    <!-- ⑧ CRM生成报价需求 -->
+    <rect x="443" y="637" width="148" height="42" rx="7" fill="#faf5ff" stroke="#ddd6fe" stroke-width="1.5"/>
+    <text x="517" y="654" text-anchor="middle" font-size="11" font-weight="700" fill="#7c3aed">⑧ 自动生成报价需求</text>
+    <text x="517" y="668" text-anchor="middle" font-size="9.5" fill="#6d28d9">CRM · 报价请求表 + 版本号</text>
+    <circle cx="587" cy="637" r="8" fill="#7c3aed"/><text x="587" y="641" text-anchor="middle" font-size="9" font-weight="700" fill="white">8</text>
+    <line x1="339" y1="658" x2="443" y2="658" stroke="#7c3aed" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#ap)"/>
+
+    <!-- → 成本工程师 -->
+    <line x1="591" y1="658" x2="780" y2="658" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#a)"/>
+    <text x="686" y="651" text-anchor="middle" font-size="9" fill="#64748b">推送报价任务</text>
+
+    <!-- ⑨ 成本估算 -->
+    <rect x="778" y="637" width="148" height="42" rx="7" fill="#fdf4ff" stroke="#f0abfc" stroke-width="1.5"/>
+    <text x="852" y="654" text-anchor="middle" font-size="11" font-weight="700" fill="#86198f">⑨ 成本估算</text>
+    <text x="852" y="668" text-anchor="middle" font-size="9.5" fill="#701a75">出具成本分析面单 · 同步CRM</text>
+    <circle cx="922" cy="637" r="8" fill="#a21caf"/><text x="922" y="641" text-anchor="middle" font-size="9" font-weight="700" fill="white">9</text>
+
+    <!-- ══ 下达SO（客改，两条路径共用） ══ -->
+    <!-- < 1万 右出 → 直接到SO节点 -->
+    <line x1="384" y1="561" x2="960" y2="561" stroke="#16a34a" stroke-width="1.5" marker-end="url(#ag)"/>
+    <text x="620" y="553" text-anchor="middle" font-size="9" font-weight="700" fill="#16a34a">&lt; 1万 → 直接下 SO</text>
+
+    <!-- ≥ 1万 成本面单 → SO节点 -->
+    <line x1="926" y1="658" x2="1030" y2="710" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#a)"/>
+
+    <!-- SO节点 < 1万 -->
+    <rect x="960" y="542" width="145" height="46" rx="7" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="2"/>
+    <text x="1032" y="558" text-anchor="middle" font-size="11" font-weight="700" fill="#15803d">⑩ 下达 SO</text>
+    <text x="1032" y="572" text-anchor="middle" font-size="9" fill="#166534">精密模具中心凭SO开项目号</text>
+    <text x="1032" y="582" text-anchor="middle" font-size="9" fill="#dc2626">SO标记"待收PO"，提醒客户经理</text>
+    <circle cx="1101" cy="542" r="8" fill="#16a34a"/><text x="1101" y="546" text-anchor="middle" font-size="9" font-weight="700" fill="white">10A</text>
+
+    <!-- SO节点 ≥ 1万 -->
+    <rect x="960" y="711" width="145" height="46" rx="7" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="2"/>
+    <text x="1032" y="727" text-anchor="middle" font-size="11" font-weight="700" fill="#15803d">⑩ 下达 SO</text>
+    <text x="1032" y="741" text-anchor="middle" font-size="9" fill="#166534">精密模具中心凭SO开项目号</text>
+    <text x="1032" y="751" text-anchor="middle" font-size="9" fill="#dc2626">SO标记"待收PO"，提醒客户经理</text>
+    <circle cx="1101" cy="711" r="8" fill="#16a34a"/><text x="1101" y="715" text-anchor="middle" font-size="9" font-weight="700" fill="white">10B</text>
+
+    <!-- SO → 客户经理跟进PO（< 1万） -->
+    <line x1="1032" y1="588" x2="1032" y2="636" stroke="#16a34a" stroke-width="1.5" marker-end="url(#ag)"/>
+    <rect x="960" y="637" width="145" height="40" rx="7" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.5"/>
+    <text x="1032" y="653" text-anchor="middle" font-size="10.5" font-weight="700" fill="#15803d">⑪ 跟进客户PO</text>
+    <text x="1032" y="665" text-anchor="middle" font-size="9" fill="#166534">无需报价 · 直接催收PO</text>
+    <circle cx="1101" cy="637" r="8" fill="#16a34a"/><text x="1101" y="641" text-anchor="middle" font-size="9" font-weight="700" fill="white">11A</text>
+
+    <!-- SO → 客户经理跟进PO（≥ 1万） -->
+    <line x1="1032" y1="757" x2="1032" y2="805" stroke="#16a34a" stroke-width="1.5" marker-end="url(#ag)"/>
+    <rect x="960" y="806" width="145" height="40" rx="7" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.5"/>
+    <text x="1032" y="822" text-anchor="middle" font-size="10.5" font-weight="700" fill="#15803d">⑪ 跟进客户PO</text>
+    <text x="1032" y="836" text-anchor="middle" font-size="9" fill="#166534">基于成本面单催收PO</text>
+    <circle cx="1101" cy="806" r="8" fill="#16a34a"/><text x="1101" y="810" text-anchor="middle" font-size="9" font-weight="700" fill="white">11B</text>
+
+    <!-- 完成 圆点 -->
+    <circle cx="1032" cy="700" r="12" fill="#16a34a"/>
+    <text x="1032" y="696" text-anchor="middle" font-size="8" font-weight="700" fill="white">改模</text>
+    <text x="1032" y="706" text-anchor="middle" font-size="8" font-weight="700" fill="white">完成</text>
+    <line x1="1032" y1="677" x2="1032" y2="688" stroke="#16a34a" stroke-width="1.5" marker-end="url(#ag)"/>
+
+    <circle cx="1032" cy="870" r="12" fill="#16a34a"/>
+    <text x="1032" y="866" text-anchor="middle" font-size="8" font-weight="700" fill="white">改模</text>
+    <text x="1032" y="877" text-anchor="middle" font-size="8" font-weight="700" fill="white">完成</text>
+    <line x1="1032" y1="846" x2="1032" y2="858" stroke="#16a34a" stroke-width="1.5" marker-end="url(#ag)"/>
+
+    <!-- SO功能说明框 -->
+    <rect x="82" y="670" width="240" height="56" rx="6" fill="#fef9c3" stroke="#fde68a" stroke-width="1.5"/>
+    <text x="202" y="686" text-anchor="middle" font-size="9" font-weight="700" fill="#b45309">💡 SO 的双重功能（客改路径）</text>
+    <text x="202" y="699" text-anchor="middle" font-size="8.5" fill="#92400e">① 生产授权：精密模具中心凭SO开项目号</text>
+    <text x="202" y="711" text-anchor="middle" font-size="8.5" fill="#92400e">② 跟进提醒：SO标记"待收PO"</text>
+    <text x="202" y="722" text-anchor="middle" font-size="8.5" fill="#92400e">    自动提醒客户经理催收</text>
+
+  </svg>
+  </div>
+
+  <!-- legend -->
+  <div style="padding:12px 20px;border-top:1px solid var(--line);background:var(--bg3);display:flex;gap:14px;flex-wrap:wrap;align-items:center">
+    <span style="font-size:.72rem;font-weight:700;color:var(--tx-mid)">图例：</span>
+    <span style="font-size:.72rem;color:var(--tx-mid);display:flex;align-items:center;gap:5px"><span style="width:11px;height:11px;background:var(--teal-d);border:1.5px solid var(--teal-b);border-radius:2px;display:inline-block"></span>注塑BU模具工程师</span>
+    <span style="font-size:.72rem;color:var(--tx-mid);display:flex;align-items:center;gap:5px"><span style="width:11px;height:11px;background:var(--orange-d);border:1.5px solid var(--orange-b);border-radius:2px;display:inline-block"></span>注塑项目工程师（归因裁判）</span>
+    <span style="font-size:.72rem;color:var(--tx-mid);display:flex;align-items:center;gap:5px"><span style="width:11px;height:11px;background:var(--blue-d);border:1.5px solid var(--blue-b);border-radius:2px;display:inline-block"></span>精密模具中心</span>
+    <span style="font-size:.72rem;color:var(--tx-mid);display:flex;align-items:center;gap:5px"><span style="width:11px;height:11px;background:var(--purple-d);border:1.5px solid var(--purple-b);border-radius:2px;display:inline-block"></span>报价中心（≥1万触发）</span>
+    <span style="font-size:.72rem;color:var(--tx-mid);display:flex;align-items:center;gap:5px"><span style="width:11px;height:11px;background:var(--green-d);border:1.5px solid var(--green-b);border-radius:2px;display:inline-block"></span>客户经理（营销中心）</span>
+    <span style="font-size:.72rem;color:#b45309">⚠ 书面记录节点</span>
+    <span style="font-size:.72rem;color:#b45309">💡 SO双重功能说明</span>
+  </div>
+</div>
+</div>
+
+<!-- ══ DOC TAB ══ -->
+<div class="tab-panel" id="tab-doc">
+
+  <div class="doc-card">
+    <div class="dc-head"><div class="dc-num">概</div><div class="dc-title">流程概述与核心逻辑</div></div>
+    <div class="dc-body" style="display:flex;flex-direction:column;gap:10px">
+      <p style="font-size:.82rem;color:var(--tx-mid);line-height:1.8">本流程适用于<strong style="color:var(--tx)">模塑一体业务</strong>中发生的模具设变（改模）管理，覆盖从设变需求发起到 SO 下达、PO 跟进的完整闭环。</p>
+      <div class="alert info">
+        <span class="ai">📌</span>
+        <div><strong>SO 与 PO 的关系（V1.2 核心修正）：</strong>自改和客改<strong>均需下达 SO</strong>，SO 是精密模具中心开项目号、启动改模作业的内部授权凭证。区别在于：自改无需客户 PO；客改需要客户 PO，但 <strong>SO 先于 PO 下达</strong>，SO 同时标记"待收 PO"状态，自动提醒客户经理跟进。</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="alert good"><span class="ai">🎯</span><div><strong>效率目标：</strong>明确六个角色职责边界，SO先行保证改模不等待，避免因收款流程拖延生产。</div></div>
+        <div class="alert warn"><span class="ai">🔒</span><div><strong>管控目标：</strong>客改收费归属书面确认，SO 上标记 PO 状态，确保追款动作内嵌流程不遗漏。</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="doc-card">
+    <div class="dc-head"><div class="dc-num">①</div><div class="dc-title">六个角色与职责边界</div></div>
+    <div class="dc-body">
+      <table class="rtable">
+        <thead><tr><th>角色</th><th>部门</th><th>核心职责</th><th>关键输出</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>注塑BU模具工程师</td>
+            <td><span class="chip t">注塑BU</span></td>
+            <td><strong>流程发起人</strong>。收集产线设变需求，通过 OA 发起设变申请。不参与自改/客改判断，避免既做裁判又做运动员。</td>
+            <td>设变需求单（OA，含模号、产品名称、改动内容）</td>
+          </tr>
+          <tr>
+            <td>注塑项目工程师</td>
+            <td><span class="chip o">注塑BU</span></td>
+            <td><strong>归因裁判 + SO下达</strong>。在精密模具方案出具后判断自改/客改（最终结论）。自改后直接下达 SO；客改确认收费归属后，按金额分流。</td>
+            <td>归因结论、SO 下达</td>
+          </tr>
+          <tr>
+            <td>精密模具项目工程师</td>
+            <td><span class="chip b">精密模具中心</span></td>
+            <td>通过 OA 接收设变需求，协调模具工程师制定改模方案。可直接与客户对接技术方案，但收费确认须留书面记录并通知注塑项目工程师。<strong>凭 SO 开项目号启动改模作业。</strong></td>
+            <td>改模方案（DFM、工时、造价），改模执行</td>
+          </tr>
+          <tr>
+            <td>精密模具工程师</td>
+            <td><span class="chip b">精密模具中心</span></td>
+            <td>协同精密模具项目工程师评估改模技术可行性，提供工时估算和技术参数。</td>
+            <td>工时估算、技术方案细节</td>
+          </tr>
+          <tr>
+            <td>成本工程师</td>
+            <td><span class="chip p">报价中心</span></td>
+            <td><strong>仅在客改且金额 ≥ 1万时介入</strong>。基于精密模具造价估算，出具成本分析面单并同步 CRM，面单完成后由注塑项目工程师下达 SO。</td>
+            <td>成本分析面单（CRM 同步）</td>
+          </tr>
+          <tr>
+            <td>客户经理</td>
+            <td><span class="chip g">营销中心</span></td>
+            <td><strong>仅在客改路径参与</strong>。SO 下达后系统自动提醒，跟进客户 PO。&lt; 1万直接催收；≥ 1万基于成本面单与客户确认报价后催收 PO。自改路径<strong>不参与</strong>。</td>
+            <td>客户 PO 确认</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="doc-card">
+    <div class="dc-head"><div class="dc-num">②</div><div class="dc-title">自改 / 客改归因标准</div></div>
+    <div class="dc-body" style="display:flex;flex-direction:column;gap:12px">
+      <div class="alert warn">
+        <span class="ai">⚠️</span>
+        <div><strong>判断时机：</strong>归因判断须在精密模具方案出具<strong>之后</strong>进行，以造价估算为客观依据。注塑项目工程师不得在方案未出前主观判定，判断结论为最终结论，不可申诉。</div>
+      </div>
+      <div class="branch-grid">
+        <div class="branch-card self">
+          <div class="branch-title">🔵 自改情形（公司内部承担费用）</div>
+          <ul class="branch-steps">
+            <li>模具正常使用损耗（顶针断裂、镶件磨损）</li>
+            <li>模具制造时的工艺失误（尺寸偏差、粗糙度不达标）</li>
+            <li>模具设计缺陷（走胶不顺、困气、缩水）</li>
+            <li>维护保养不当导致的损坏</li>
+            <li>公司内部试模过程中造成的损伤</li>
+            <li>DFM 阶段公司评估失误，导致后期需改模</li>
+          </ul>
+        </div>
+        <div class="branch-card client">
+          <div class="branch-title">🟠 客改情形（费用由客户承担）</div>
+          <ul class="branch-steps">
+            <li>客户产品设计变更（ECN）——尺寸、结构、壁厚调整</li>
+            <li>客户更改材料规格（影响收缩率或工艺参数）</li>
+            <li>客户更改外观要求（纹路、光泽度、颜色）</li>
+            <li>客户更改功能要求（配合关系、装配结构）</li>
+            <li>客户更改标准或认证要求（标识、材料牌号）</li>
+            <li>客户要求增减模穴数量</li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:.8rem;font-weight:700;color:var(--tx);margin-bottom:8px">⚡ 灰色地带处理规则</div>
+        <table class="rtable">
+          <thead><tr><th>情形</th><th>判定规则</th></tr></thead>
+          <tbody>
+            <tr><td>客户投诉产品不良，但根因是模具问题</td><td><span class="chip b">自改</span> 问题根因决定费用归属，不因客户投诉改变</td></tr>
+            <tr><td>DFM 阶段客户已签字确认，量产后不满意</td><td><span class="chip o">客改</span> 以 DFM 书面签字记录为准，已确认即视为客改</td></tr>
+            <tr><td>模具到期需翻新，合同无寿命约定</td><td><span class="chip gr">待议</span> 双方协商；建议后续新合同加入模具寿命条款</td></tr>
+            <tr><td>客户要求提升性能，但模具本身亦有缺陷</td><td><span class="chip gr">拆分</span> 缺陷修复部分自改，性能提升部分客改，分别核算</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="doc-card">
+    <div class="dc-head"><div class="dc-num">③</div><div class="dc-title">三条路径详细步骤</div></div>
+    <div class="dc-body" style="display:flex;flex-direction:column;gap:18px">
+
+      <!-- 自改 -->
+      <div>
+        <div style="font-size:.82rem;font-weight:700;color:var(--blue);margin-bottom:8px">🔵 路径A：自改（任意金额）</div>
+        <table class="rtable">
+          <thead><tr><th style="width:40px">步骤</th><th>操作</th><th>执行角色</th><th>输出</th></tr></thead>
+          <tbody>
+            <tr><td style="font-family:var(--mono);font-weight:700">S1</td><td>通过 OA 发起设变需求</td><td><span class="chip t">注塑BU模具工程师</span></td><td>设变需求单</td></tr>
+            <tr><td style="font-family:var(--mono);font-weight:700">S2</td><td>OA 接收，协调制定改模方案（DFM、工时、造价）</td><td><span class="chip b">精密模具项目工程师 + 模具工程师</span></td><td>改模方案文件</td></tr>
+            <tr><td style="font-family:var(--mono);font-weight:700">S3</td><td>审核方案，裁定为<strong>自改</strong></td><td><span class="chip o">注塑项目工程师</span></td><td>归因结论（最终，不可申诉）</td></tr>
+            <tr><td style="font-family:var(--mono);font-weight:700">S4</td><td><strong>直接下达 SO</strong>，费用公司自担，无需客户 PO，客户经理不参与</td><td><span class="chip o">注塑项目工程师</span></td><td>SO（内部授权凭证）</td></tr>
+            <tr><td style="font-family:var(--mono);font-weight:700">S5</td><td>凭 SO 开项目号，安排改模作业</td><td><span class="chip b">精密模具中心</span></td><td>改模完成</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 客改 -->
+      <div>
+        <div style="font-size:.82rem;font-weight:700;color:var(--orange);margin-bottom:8px">🟠 路径B：客改（共同步骤）</div>
+        <table class="rtable">
+          <thead><tr><th style="width:40px">步骤</th><th>操作</th><th>执行角色</th><th>输出/要求</th></tr></thead>
+          <tbody>
+            <tr><td style="font-family:var(--mono);font-weight:700">C1–C3</td><td>同自改 S1–S3</td><td>同上</td><td>同上</td></tr>
+            <tr><td style="font-family:var(--mono);font-weight:700">C4</td><td>裁定为<strong>客改</strong>，与客户确认收费归属<span class="tag warn">书面必留</span></td><td><span class="chip o">注塑项目工程师（主责）</span>或<span class="chip b">精密模具项目工程师（效率）</span></td><td>邮件/微信截图，明确"客户同意付费"</td></tr>
+            <tr><td style="font-family:var(--mono);font-weight:700">C5</td><td>判断改模金额（以方案造价估算为准）</td><td><span class="chip o">注塑项目工程师</span></td><td>金额分流判断</td></tr>
+          </tbody>
+        </table>
+
+        <div class="amount-grid">
+          <div class="amount-card lt">
+            <div class="amount-head">客改 · 金额 &lt; 1万元</div>
+            <ul class="amount-steps">
+              <li><strong>直接下达 SO</strong>（不经过成本工程师）</li>
+              <li>SO 标记"待收 PO"，系统提醒客户经理</li>
+              <li>精密模具中心凭 SO 开项目号，启动改模</li>
+              <li>客户经理同步跟进客户 PO（改模不等 PO）</li>
+            </ul>
+          </div>
+          <div class="amount-card gte">
+            <div class="amount-head">客改 · 金额 ≥ 1万元</div>
+            <ul class="amount-steps">
+              <li>CRM 自动生成报价需求（请求表 + 版本号）</li>
+              <li>成本工程师出具成本分析面单，同步 CRM</li>
+              <li>面单完成后<strong>下达 SO</strong>，SO 标记"待收 PO"</li>
+              <li>精密模具中心凭 SO 开项目号，启动改模</li>
+              <li>客户经理基于成本面单跟进客户 PO</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="alert info" style="margin-top:10px">
+          <span class="ai">💡</span>
+          <div><strong>SO 先行的设计逻辑：</strong>SO 是生产授权凭证，精密模具中心必须持有 SO 才能开项目号启动改模。SO 上的"待收 PO"状态同时充当系统级跟进提醒，将追款动作内嵌进流程，不依赖人工记忆。改模作业与 PO 跟进并行推进，效率和管控两不误。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="doc-card">
+    <div class="dc-head"><div class="dc-num">④</div><div class="dc-title">关键规则与风险提示</div></div>
+    <div class="dc-body" style="display:flex;flex-direction:column;gap:10px">
+      <div class="alert warn">
+        <span class="ai">📝</span>
+        <div><strong>书面记录强制要求：</strong>不论是注塑项目工程师还是精密模具项目工程师与客户沟通，以下两件事必须留书面记录：① 客户明确确认"费用由客户承担"；② 客户对改模金额有书面回复（≥1万时须对报价有明确书面确认）。口头确认不作为追款依据。</div>
+      </div>
+      <div class="alert warn">
+        <span class="ai">⚡</span>
+        <div><strong>精密模具项目工程师直接对客时的边界：</strong>负责技术方案沟通，<strong>收费归属和金额属于商务事项</strong>，须同步通知注塑项目工程师，不得单独以口头形式向客户承诺价格，避免与成本工程师核算结果出入造成内部被动。</div>
+      </div>
+      <div class="alert info">
+        <span class="ai">🔮</span>
+        <div><strong>待完善事项：</strong>目前模具合同未约定模具寿命，建议后续新合同加入模具寿命条款（以模次或年限），从根本上消除翻新费用归属争议。</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="doc-card">
+    <div class="dc-head"><div class="dc-num">附</div><div class="dc-title">版本记录</div></div>
+    <div class="dc-body">
+      <table class="ver-table">
+        <thead><tr><th>版本</th><th>日期</th><th>修订内容</th></tr></thead>
+        <tbody>
+          <tr><td style="font-family:var(--mono);font-weight:700">V1.0</td><td>2026-04-22</td><td>首次定稿：明确自改/客改归因规则、金额分级处理路径及书面记录要求</td></tr>
+          <tr><td style="font-family:var(--mono);font-weight:700">V1.1</td><td>2026-04-22</td><td>修正发起角色为注塑BU模具工程师；明确注塑项目工程师仅负责归因裁判；增加精密模具工程师独立泳道；OA流转路径更新</td></tr>
+          <tr><td style="font-family:var(--mono);font-weight:700">V1.2</td><td>2026-04-22</td><td>修正SO/PO逻辑：自改和客改均下达SO；客改路径SO先于PO下达，SO标记"待收PO"状态提醒客户经理跟进；明确SO双重功能（生产授权 + 跟进提醒）；客户经理职责更新为"SO下达后跟进PO"</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+</div>
+<script>
+function setTab(name,btn){
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active')});
+  document.querySelectorAll('.tab-panel').forEach(function(p){p.classList.remove('active')});
+  btn.classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+}
+</script>
+</body>
+</html>

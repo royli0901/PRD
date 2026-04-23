@@ -3,100 +3,331 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRM 核心概念</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles/site.css">
+    <title>CRM 演示系统</title>
+    <style>
+        :root {
+            --primary-purple: #534AB7;
+            --light-purple: #AFA9EC;
+            --primary-teal: #1D9E75;
+            --light-green: #E1F5EE;
+            --amber: #FAC775;
+            --gray-card: #F4F4F4;
+            --border-color: #E0E0E0;
+            --text-main: #333;
+            --text-sub: #666;
+            --risk-bg: #FCEBEB;
+            --risk-border: #A32D2D;
+            --risk-text: #791F1F;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 24px;
+            color: var(--text-main);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 32px;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.09);
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+            padding-bottom: 20px;
+            border-bottom: 2px dashed var(--border-color);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-purple);
+            margin: 0;
+        }
+
+        .header-badge {
+            background: var(--light-green);
+            color: var(--primary-teal);
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--primary-teal);
+        }
+
+        .module {
+            position: relative;
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 24px 20px 20px;
+            margin-bottom: 24px;
+            transition: border-color 0.2s;
+        }
+
+        .module:hover {
+            border-color: var(--light-purple);
+        }
+
+        .module-label {
+            position: absolute;
+            top: -11px;
+            left: 16px;
+            background: #fff;
+            padding: 0 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--primary-purple);
+            letter-spacing: 0.5px;
+        }
+
+        .module-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 12px;
+        }
+
+        .card {
+            background: var(--gray-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            transition: box-shadow 0.2s, transform 0.15s;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 12px rgba(83, 74, 183, 0.12);
+            transform: translateY(-1px);
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin: 0 0 4px;
+        }
+
+        .card-desc {
+            font-size: 11px;
+            color: var(--text-sub);
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .card-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+            font-size: 11px;
+            color: var(--text-sub);
+        }
+
+        .dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .dot-purple { background: var(--primary-purple); }
+        .dot-teal { background: var(--primary-teal); }
+        .dot-amber { background: var(--amber); }
+
+        .win-divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .win-divider::before,
+        .win-divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            border-top: 2px dashed var(--border-color);
+        }
+
+        .win-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--light-green);
+            color: var(--primary-teal);
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 16px;
+            border-radius: 20px;
+            border: 1px solid var(--primary-teal);
+            white-space: nowrap;
+        }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+            margin-top: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            color: var(--text-sub);
+        }
+
+        .legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .risk-card {
+            background: var(--risk-bg);
+            border: 1px solid var(--risk-border);
+            border-radius: 8px;
+            padding: 12px;
+        }
+
+        .risk-card .card-title {
+            color: var(--risk-text);
+        }
+
+        .risk-card .card-desc {
+            color: var(--risk-text);
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 11px;
+            color: var(--text-sub);
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 640px) {
+            body { padding: 12px; }
+            .container { padding: 20px 16px; }
+            .header { flex-direction: column; align-items: flex-start; gap: 8px; }
+            .module-grid { grid-template-columns: 1fr; }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <h1>CRM 核心概念</h1>
-        <p class="page-desc">名词 · 术语 · 流程 · 功能 · 计算</p>
-        <nav class="tabs" aria-label="CRM 页面导航">
-            <a class="tab active" href="index.html">CRM 核心概念</a>
-            <a class="tab" href="客户健康度方案.html">客户健康度方案</a>
-            <a class="tab" href="客户健康度演示.html">客户健康度演示</a>
-            <a class="tab" href="客户生命周期.html">客户生命周期</a>
-            <a class="tab" href="商机阶段.html">商机阶段</a>
-            <a class="tab" href="线索转商机.html">线索转商机</a>
-        </nav>
+        <div class="header">
+            <h1>CRM 演示系统</h1>
+            <span class="header-badge">5 个模块</span>
+        </div>
 
-        <section class="section">
-            <div class="section-head">
-                <span class="section-label">📖 名词解释</span>
-                <hr class="section-divider">
+        <div class="module">
+            <div class="module-label">客户管理</div>
+            <div class="module-grid">
+                <a href="客户健康度_可落地优化方案_V4.html" class="card" style="text-decoration:none;display:block">
+                    <div class="card-title">客户健康度 · 可落地优化方案 V4</div>
+                    <div class="card-desc">健康度评分模型、各维度详解、数据流转与落地计划</div>
+                    <div class="card-meta">
+                        <span class="dot dot-teal"></span>
+                        <span>核心模型</span>
+                    </div>
+                </a>
+                <a href="客户健康度演示.html" class="card" style="text-decoration:none;display:block">
+                    <div class="card-title">客户健康度演示</div>
+                    <div class="card-desc">健康度看板交互演示与数据可视化</div>
+                    <div class="card-meta">
+                        <span class="dot dot-amber"></span>
+                        <span>演示</span>
+                    </div>
+                </a>
+                <a href="客户生命周期（逻辑规范）.html" class="card" style="text-decoration:none;display:block">
+                    <div class="card-title">客户生命周期 · 逻辑规范</div>
+                    <div class="card-desc">模塑一体与商品模全生命周期判定流程</div>
+                    <div class="card-meta">
+                        <span class="dot dot-purple"></span>
+                        <span>规范</span>
+                    </div>
+                </a>
             </div>
-            <div class="card">
-                <h3>销售漏斗</h3>
-                <p>从潜在客户到成交客户的转化阶段模型。</p>
-            </div>
-            <div class="card">
-                <h3>客户健康度</h3>
-                <p>衡量客户关系稳定性和业务价值的综合评分模型。</p>
-            </div>
-            <div class="card">
-                <h3>客户生命周期</h3>
-                <p>客户从识别、转化、成长到留存与流失的完整阶段管理框架。</p>
-            </div>
-        </section>
+        </div>
 
-        <section class="section">
-            <div class="section-head">
-                <span class="section-label">📝 术语定义</span>
-                <hr class="section-divider">
+        <div class="module">
+            <div class="module-label">商机管理</div>
+            <div class="module-grid">
+                <a href="商机推进.html" class="card" style="text-decoration:none;display:block">
+                    <div class="card-title">商机推进</div>
+                    <div class="card-desc">模塑一体 & 商品模业务全生命周期流程图</div>
+                    <div class="card-meta">
+                        <span class="dot dot-teal"></span>
+                        <span>流程</span>
+                    </div>
+                </a>
+                <a href="线索转商机.html" class="card" style="text-decoration:none;display:block">
+                    <div class="card-title">线索转商机</div>
+                    <div class="card-desc">线索识别、评估与转化流程</div>
+                    <div class="card-meta">
+                        <span class="dot dot-amber"></span>
+                        <span>转化</span>
+                    </div>
+                </a>
             </div>
-            <div class="card">
-                <h3>健康度评分</h3>
-                <p>产品使用分、互动频率分、业务价值分与风险预警分按权重加总得出。</p>
-            </div>
-            <div class="card">
-                <h3>阶段判定</h3>
-                <p>结合最近交互时间、订单金额、使用深度与反馈表现来定义生命周期阶段。</p>
-            </div>
-        </section>
+        </div>
 
-        <section class="section">
-            <div class="section-head">
-                <span class="section-label">🔁 标准流程</span>
-                <hr class="section-divider">
-            </div>
-            <ul class="step-list">
-                <li class="step-item"><span class="step-index">1</span><span>线索识别与评估</span></li>
-                <li class="step-item"><span class="step-index">2</span><span>商机创建与分级</span></li>
-                <li class="step-item"><span class="step-index">3</span><span>需求分析与方案制定</span></li>
-                <li class="step-item"><span class="step-index">4</span><span>报价与合同谈判</span></li>
-                <li class="step-item"><span class="step-index">5</span><span>成交与交付</span></li>
-            </ul>
-        </section>
+        <div class="win-divider">
+            <span class="win-badge">核心能力</span>
+        </div>
 
-        <section class="section">
-            <div class="section-head">
-                <span class="section-label">⚙️ 核心功能</span>
-                <hr class="section-divider">
+        <div class="module">
+            <div class="module-label">风险监控</div>
+            <div class="module-grid">
+                <div class="risk-card">
+                    <div class="card-title">待跟进提醒</div>
+                    <div class="card-desc">健康度低于阈值客户自动标记，推送跟进任务</div>
+                </div>
+                <div class="risk-card">
+                    <div class="card-title">生命周期预警</div>
+                    <div class="card-desc">阶段停留超时、异常流失等风险实时预警</div>
+                </div>
             </div>
-            <div class="card">
-                <h3>客户全景视图</h3>
-                <p>统一展示客户档案、跟进记录、互动行为和关键指标。</p>
-            </div>
-            <div class="card">
-                <h3>商机管理看板</h3>
-                <p>按阶段追踪商机，支持风险提示、推进建议和负责人协同。</p>
-            </div>
-        </section>
+        </div>
 
-        <section class="section">
-            <div class="section-head">
-                <span class="section-label">🧮 计算逻辑</span>
-                <hr class="section-divider">
+        <div class="legend">
+            <div class="legend-item">
+                <span class="legend-dot" style="background:var(--primary-purple)"></span>
+                核心模型
             </div>
-            <div class="card">
-                <h3>健康度计算公式</h3>
-                <p>健康度 = 产品使用分 × 30% + 互动频率分 × 25% + 业务价值分 × 25% + 风险预警分 × 20%。</p>
+            <div class="legend-item">
+                <span class="legend-dot" style="background:var(--primary-teal)"></span>
+                流程
             </div>
-            <div class="card">
-                <h3>风险预警阈值</h3>
-                <p>当连续低活跃、交互中断或满意度下降时，自动触发预警标记。</p>
+            <div class="legend-item">
+                <span class="legend-dot" style="background:var(--amber)"></span>
+                演示
             </div>
-        </section>
+            <div class="legend-item">
+                <span class="legend-dot" style="background:var(--risk-border)"></span>
+                风险监控
+            </div>
+        </div>
+
+        <div class="footer">
+            CRM 演示系统 · 内部使用
+        </div>
     </div>
 </body>
 </html>

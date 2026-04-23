@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模塑一体 & 商品模业务全生命周期流程图</title>
+    <style>
+        :root {
+            --primary-purple: #534AB7;
+            --light-purple: #AFA9EC;
+            --primary-teal: #1D9E75;
+            --light-teal: #E1F5EE;
+            --gray-card: #F4F4F4;
+            --border-color: #E0E0E0;
+            --text-main: #333;
+            --text-sub: #666;
+            --dark-gray: #4a4a4a;
+            --status-purple: #3f3d91;
+            --win-green: #0a5d4a;
+            --action-bg: #F0F4F8;
+            --action-border: #D1D9E0;
+            --risk-bg: #FCEBEB;
+            --risk-border: #A32D2D;
+            --risk-text: #791F1F;
+            --moulding-bg: #EEF2FF;
+            --moulding-border: #7F77DD;
+            --moulding-text: #3C3489;
+            --commodity-bg: #FFF8EC;
+            --commodity-border: #BA7517;
+            --commodity-text: #633806;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 24px;
+            color: var(--text-main);
+        }
+
+        .container {
+            max-width: 1080px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 32px;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.09);
+        }
+
+        .header {
+            border-left: 5px solid var(--primary-purple);
+            padding-left: 15px;
+            margin-bottom: 28px;
+        }
+        .header h1 { font-size: 20px; margin: 0; color: var(--primary-purple); }
+        .header p  { font-size: 13px; color: var(--text-sub); margin: 5px 0 0; }
+
+        /* ── Phase wrappers ── */
+        .phase-section {
+            border: 1.5px dashed var(--light-purple);
+            border-radius: 12px;
+            padding: 28px 20px 22px;
+            position: relative;
+        }
+        .phase-section.project { border-color: var(--primary-teal); }
+        .phase-tag {
+            position: absolute;
+            top: -13px; left: 20px;
+            background: #fff;
+            padding: 0 10px;
+            font-size: 12px; font-weight: bold;
+            color: var(--primary-purple);
+        }
+        .project .phase-tag { color: var(--primary-teal); }
+
+        /* ── Opportunity table ── */
+        /* 5 cols: stage | quote-status | win-rate | actions | [suspend sidebar handled via absolute] */
+        .flow-table {
+            display: grid;
+            grid-template-columns: 148px 148px 100px 1fr;
+            gap: 0;
+            margin-top: 10px;
+            position: relative;
+        }
+
+        /* header row */
+        .th {
+            padding: 10px 12px;
+            text-align: center;
+            font-size: 13px; font-weight: bold;
+            border-radius: 6px;
+            color: #fff;
+            margin: 0 4px 10px;
+        }
+        .th.gray   { background: var(--dark-gray); }
+        .th.purple { background: var(--status-purple); }
+        .th.teal   { background: var(--win-green); }
+        .th.action { background: var(--action-bg); color: var(--dark-gray); border: 1px solid var(--action-border); }
+
+        /* stage rows */
+        .row-group { display: contents; }
+
+        .cell {
+            padding: 11px 13px;
+            font-size: 12px;
+            line-height: 1.65;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin: 0 4px 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+        .cell-title {
+            font-weight: bold;
+            font-size: 13px;
+            margin-bottom: 5px;
+            display: block;
+        }
+        .cell-gate {
+            margin-top: 7px;
+            padding-top: 6px;
+            border-top: 1px dashed rgba(255,255,255,0.4);
+            font-size: 11px;
+            line-height: 1.5;
+            opacity: 0.88;
+        }
+        .cell-gate-label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 2px;
+            letter-spacing: 0.01em;
+        }
+
+        .cell-gray   { background: var(--dark-gray); color: #fff; border-color: var(--dark-gray); }
+        .cell-purple { background: var(--status-purple); color: #fff; border-color: var(--status-purple); }
+        .cell-teal   { background: var(--win-green); color: #fff; border-color: var(--win-green); text-align: center; }
+        .cell-action { background: var(--action-bg); color: var(--text-main); border-color: var(--action-border); }
+
+        .cell-teal .cell-gate { border-top-color: rgba(255,255,255,0.35); }
+        .cell-gray .cell-gate { border-top-color: rgba(255,255,255,0.3); }
+
+        /* ── Business diff rows ── */
+        .diff-row {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: 148px 1fr 1fr;
+            gap: 0;
+            margin: -2px 0 10px;
+        }
+        .diff-label {
+            margin: 0 4px;
+            padding: 8px 12px;
+            background: #f8f8f8;
+            border: 1px dashed var(--border-color);
+            border-radius: 8px;
+            font-size: 11px;
+            color: var(--text-sub);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            line-height: 1.4;
+        }
+        .diff-moulding {
+            margin: 0 4px;
+            padding: 9px 13px;
+            background: var(--moulding-bg);
+            border: 1px solid var(--moulding-border);
+            border-radius: 8px;
+            font-size: 11px;
+            color: var(--moulding-text);
+            line-height: 1.6;
+        }
+        .diff-commodity {
+            margin: 0 4px;
+            padding: 9px 13px;
+            background: var(--commodity-bg);
+            border: 1px solid var(--commodity-border);
+            border-radius: 8px;
+            font-size: 11px;
+            color: var(--commodity-text);
+            line-height: 1.6;
+        }
+        .diff-biz-label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        /* ── Suspend sidebar ── */
+        .suspend-float {
+            position: absolute;
+            right: -172px;
+            top: 0;
+            width: 156px;
+        }
+        .suspend-box {
+            background: #FAEEDA;
+            border: 1.5px dashed #854F0B;
+            border-radius: 10px;
+            padding: 12px 13px;
+            font-size: 11px;
+            color: #633806;
+            line-height: 1.6;
+        }
+        .suspend-box .s-title {
+            font-weight: bold;
+            font-size: 12px;
+            display: block;
+            margin-bottom: 5px;
+            color: #4a2800;
+        }
+        .suspend-arrow {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            margin-bottom: 6px;
+            font-size: 10px;
+            color: #854F0B;
+        }
+        .suspend-arrow span {
+            width: 1px;
+            height: 10px;
+            background: #854F0B;
+            display: block;
+        }
+        .suspend-note {
+            margin-top: 8px;
+            padding-top: 7px;
+            border-top: 1px dashed #c8860a;
+            font-size: 10px;
+            color: #7a4f0d;
+        }
+
+        /* ── Outer wrapper for suspend layout ── */
+        .opportunity-outer {
+            position: relative;
+            margin-right: 180px;
+        }
+
+        .suspend-connector {
+            position: absolute;
+            right: -180px;
+            top: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0;
+        }
+
+        /* ── Win divider ── */
+        .divider-win {
+            margin: 30px 0;
+            border-top: 2px dashed var(--primary-teal);
+            position: relative;
+            text-align: center;
+        }
+        .win-badge {
+            position: absolute;
+            top: -14px; left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary-teal);
+            color: #fff;
+            padding: 4px 22px;
+            border-radius: 20px;
+            font-size: 12px; font-weight: bold;
+            white-space: nowrap;
+        }
+
+        /* ── Project phase ── */
+        .project-grid {
+            display: flex;
+            gap: 16px;
+            margin-top: 14px;
+        }
+        .project-main {
+            flex: 2;
+            border: 1px solid var(--primary-teal);
+            background: var(--light-teal);
+            color: var(--text-main);
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 12px;
+            line-height: 1.65;
+        }
+        .project-sub { flex: 1; display: flex; flex-direction: column; gap: 12px; }
+        .project-sub .cell { margin: 0; }
+
+        ul { margin: 0; padding-left: 17px; }
+        li { margin-bottom: 3px; }
+
+        /* ── Legend ── */
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 18px;
+            margin-top: 28px;
+            padding-top: 18px;
+            border-top: 1px solid #eee;
+            font-size: 12px;
+            color: var(--text-sub);
+        }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- Header -->
+    <div class="header">
+        <h1>模塑一体 &amp; 商品模业务完整生命周期图谱</h1>
+        <p>商机阶段管理 (CRM) → 赢单转化 → 项目阶段执行 (CRM + SAP)　｜　两类业务差异字段在各阶段单独标注</p>
+    </div>
+
+    <!-- ════════════════════════════════
+         PHASE 1 — 商机阶段
+    ════════════════════════════════ -->
+    <div class="phase-section" style="overflow: visible;">
+        <div class="phase-tag">商机阶段 (Opportunity)</div>
+
+        <div class="opportunity-outer">
+            <div class="flow-table">
+
+                <!-- Column headers -->
+                <div class="th gray">商机阶段</div>
+                <div class="th purple">报价状态</div>
+                <div class="th teal">胜率</div>
+                <div class="th action">关键动作 / 触发条件</div>
+
+                <!-- ── 初步识别 ── -->
+                <div class="cell cell-gray">
+                    <span class="cell-title">初步识别</span>
+                    确认 RFQ 意向<br>关系图谱建立
+                    <div class="cell-gate">
+                        <span class="cell-gate-label">进入条件：</span>
+                        线索评分 A/B 级，或老客户明确新需求，商机已创建
+                    </div>
+                </div>
+                <div class="cell cell-purple">
+                    暂无报价<br>或 First Offer 发起中
+                </div>
+                <div class="cell cell-teal">
+                    <b>10 – 20%</b><br>
+                    <span style="font-size:11px;">意向未验证</span>
+                </div>
+                <div class="cell cell-action">
+                    <ul>
+                        <li>填写 EB（最终决策者）/ TB（技术决策者）/ User 关系图谱</li>
+                        <li>竞争对手信息录入</li>
+                        <li>发起报价需求（营销中心 / 成本工程师分配）</li>
+                    </ul>
+                </div>
+
+                <!-- diff row 1 -->
+                <div class="diff-row">
+                    <div class="diff-label">业务差异<br>补充字段</div>
+                    <div class="diff-moulding">
+                        <span class="diff-biz-label">模塑一体业务</span>
+                        预计启动时间 · 预计量产时间 · 预计结束时间<br>
+                        项目总需求量（月需求量）· MOQ · 贸易条款
+                    </div>
+                    <div class="diff-commodity">
+                        <span class="diff-biz-label">商品模业务</span>
+                        预计 T1 时间 · 内部产能确认<br>
+                        产品类型 · 平均模穴 · 进胶方式
+                    </div>
+                </div>
+
+                <!-- ── 报价博弈 ── -->
+                <div class="cell cell-gray">
+                    <span class="cell-title">报价博弈</span>
+                    报价送出<br>等待客户反馈
+                    <div class="cell-gate">
+                        <span class="cell-gate-label">进入条件：</span>
+                        关系图谱已填写，RFQ 需求已收集，报价需求已发起
+                    </div>
+                </div>
+                <div class="cell cell-purple">
+                    <b>First Offer (Q1)</b><br>
+                    <b>Update  Offer (Q2)</b>
+                    <div style="margin-top:6px; font-size:11px; opacity:0.85;">价格调整版本，竞争博弈</div>
+                </div>
+                <div class="cell cell-teal">
+                    <b>25 – 40%</b><br>
+                    <span style="font-size:11px; display:block; margin-top:4px;">First Offer 25%<br>Update  Offer 40%</span>
+                </div>
+                <div class="cell cell-action">
+                    <ul>
+                        <li>向客户发出正式报价</li>
+                        <li>记录竞争对手报价 / 价格偏离度</li>
+                        <li>可发起资信申请（老客户新项目同步适用）</li>
+                        <li>客户反馈跟进记录（必填）</li>
+                    </ul>
+                </div>
+
+                <!-- diff row 2 -->
+                <div class="diff-row">
+                    <div class="diff-label">业务差异<br>补充字段</div>
+                    <div class="diff-moulding">
+                        <span class="diff-biz-label">模塑一体业务</span>
+                        模具 + 产品联合报价（成本中心统一处理）<br>
+                        多人独立估算 · 内部议价后送出
+                    </div>
+                    <div class="diff-commodity">
+                        <span class="diff-biz-label">商品模业务</span>
+                        商品模成本评估 · 商品模计价表<br>
+                        报价版本号生成 · 版本对比管理
+                    </div>
+                </div>
+
+                <!-- ── 深度谈判与内部预备 ── -->
+                <div class="cell cell-gray">
+                    <span class="cell-title">深度谈判</span>
+                    条款锁定<br>内部资源预排
+                    <div class="cell-gate">
+                        <span class="cell-gate-label">进入条件：</span>
+                        客户已明确倾向我方，进入实质性条款谈判，竞争对手基本排除
+                    </div>
+                </div>
+                <div class="cell cell-purple">
+                    <b>H Potential</b><br>
+                    <span style="font-size:11px;">客户倾向确认<br>内部资源预排</span>
+                </div>
+                <div class="cell cell-teal">
+                    <b>75%</b><br>
+                    <span style="font-size:11px;">明确倾向我方</span>
+                </div>
+                <div class="cell cell-action">
+                    <ul>
+                        <li>付款条款锁定（预付款比例 · 账期确认）</li>
+                        <li>超出底线时触发审批：
+                            <ul style="margin-top:4px;">
+                                <li>商品模：毛利率 &lt; 0%，或报价金额 &gt; 1000 万港币 → CEO 审批</li>
+                                <li>模塑一体：毛利率 &lt; 10%，或预计销售额 &gt; 5000 万港币，或新增固定资产 &gt; 500 万港币 → CEO 审批</li>
+                            </ul>
+                        </li>
+                        <li>客户准入正式审批发起</li>
+                        <li>同步 APS 信息 · 立项内部预排</li>
+                    </ul>
+                </div>
+
+                <!-- diff row 3 -->
+                <div class="diff-row">
+                    <div class="diff-label">业务差异<br>补充字段</div>
+                    <div class="diff-moulding">
+                        <span class="diff-biz-label">模塑一体业务</span>
+                        产品成本版本快照锁定<br>
+                        新增固定资产投资确认（模具计价方式确认）
+                    </div>
+                    <div class="diff-commodity">
+                        <span class="diff-biz-label">商品模业务</span>
+                        报价金额（HKD）最终版本确认<br>
+                        付款条件是否超 90 天判断
+                    </div>
+                </div>
+
+                <!-- ── 新模分配 ── -->
+                <div class="cell cell-gray">
+                    <span class="cell-title">新模分配</span>
+                    赢单节点<br>项目移交
+                    <div class="cell-gate">
+                        <span class="cell-gate-label">进入条件：</span>
+                        客户书面确认下单意向，审批（如需）已通过，新客户资信审核通过
+                    </div>
+                </div>
+                <div class="cell cell-purple">
+                    <b>Secured</b><b>In System</b><br>
+                    <span style="font-size:11px;">客户确认下单<br>签约流程触发</span>
+                </div>
+                <div class="cell cell-teal">
+                    <b>95%</b><b>100%</b><br>
+                    <span style="font-size:11px;">合同收款安排</span>
+                </div>
+                <div class="cell cell-action">
+                    <ul>
+                        <li>立项申请预填推送 / POSO 流程发起</li>
+                        <li>模号申请（模塑一体）/ 归档（商品模）</li>
+                        <li>同步 SAP · 同步 OA</li>
+                        <li>商机标记赢单并关闭</li>
+                        <li>赢单经验归档入知识库</li>
+                    </ul>
+                </div>
+
+                <!-- diff row 4 -->
+                <div class="diff-row">
+                    <div class="diff-label">业务差异<br>补充字段</div>
+                    <div class="diff-moulding">
+                        <span class="diff-biz-label">模塑一体业务</span>
+                        赢单后自动创建 CRM 项目对象<br>
+                        注塑订单持续跟进（见项目阶段）
+                    </div>
+                    <div class="diff-commodity">
+                        <span class="diff-biz-label">商品模业务</span>
+                        赢单后移交项目团队<br>
+                        CRM 商机关闭，后续由项目团队跟进
+                    </div>
+                </div>
+
+            </div><!-- /flow-table -->
+
+            <!-- ── Suspend 旁路（浮动侧边）── -->
+            <div style="position:absolute; right:-174px; top:52px; width:158px;">
+                <div class="suspend-box">
+                    <span class="s-title">Suspend 搁置</span>
+                    <div style="font-size:11px; margin-bottom:6px; color:#7a4f0d;">可从任意阶段进入</div>
+                    胜率降至 <b>15%</b><br>
+                    系统创建 90 天复活任务<br>
+                    超期未激活 → 自动关闭商机
+                    <div class="suspend-note">
+                        触发场景：<br>
+                        · First Offer 无回音<br>
+                        · 客户项目暂缓<br>
+                        · H Potential 突然搁置<br>
+                        · 内部资源无法保障
+                    </div>
+                </div>
+                <div style="margin-top:8px; padding:8px 10px; background:var(--risk-bg); border:1px solid var(--risk-border); border-radius:8px; font-size:11px; color:var(--risk-text); line-height:1.5;">
+                    <b>丢单关闭</b><br>
+                    填写丢单原因<br>（13类标准选项）<br>
+                    经验归档知识库
+                </div>
+            </div>
+
+        </div><!-- /opportunity-outer -->
+    </div><!-- /phase-section -->
+
+    <!-- Win divider -->
+    <div class="divider-win" style="margin-right: 180px;">
+        <div class="win-badge">模具赢单 · 商机关闭</div>
+    </div>
+
+    <!-- ════════════════════════════════
+         PHASE 2 — 项目阶段（仅模塑一体）
+    ════════════════════════════════ -->
+    <div class="phase-section project" style="margin-right: 180px;">
+        <div class="phase-tag">项目阶段 (Project) — 模塑一体业务</div>
+        <div style="font-size:11px; color:var(--text-sub); margin: 2px 0 14px; padding-left:2px;">商品模赢单后移交项目团队，不在此阶段管理</div>
+        <div class="project-grid">
+            <div class="project-main">
+                <span class="cell-title" style="font-size:14px; color: var(--win-green);">CRM 项目对象</span>
+                <p style="font-size:11px; color:var(--text-sub); margin:0 0 10px;">由商机自动生成，关联客户 360 视图，详细跟进节奏见项目阶段说明文档</p>
+                <ul style="columns:2; font-size:12px;">
+                    <li>项目编号（关联商机号）</li>
+                    <li>客户经理跟进记录</li>
+                    <li>模具 T1 / 量产日期</li>
+                    <li>注塑订单滚动预测</li>
+                    <li>客户健康度（SAP 回传）</li>
+                    <li>改模 / 设变需求入口</li>
+                </ul>
+            </div>
+            <div class="project-sub">
+                <div class="cell" style="margin:0; background:var(--gray-card); color:var(--text-main);">
+                    <span class="cell-title">SAP 订单系统</span>
+                    注塑 PO 逐单管理 · 交货计划 · 回款跟踪 · 模具折旧<br>
+                    <span style="font-size:11px; color:var(--text-sub);">月度汇总自动回传 CRM，触发健康度更新</span>
+                </div>
+                <div class="cell" style="margin:0; background:var(--win-green); color:#fff; border:none;">
+                    <span class="cell-title">销售预测</span>
+                    月 / 季注塑订单滚动维护<br>
+                    <span style="font-size:11px; opacity:0.85;">客户经理持续更新</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="legend" style="margin-right:180px;">
+        <div class="legend-item"><div class="dot" style="background:var(--status-purple);"></div> 报价状态</div>
+        <div class="legend-item"><div class="dot" style="background:var(--win-green);"></div> 胜率 / 项目阶段</div>
+        <div class="legend-item"><div class="dot" style="background:var(--action-bg); border:1px solid var(--action-border);"></div> 关键动作</div>
+        <div class="legend-item"><div class="dot" style="background:var(--moulding-bg); border:1px solid var(--moulding-border);"></div> 模塑一体差异字段</div>
+        <div class="legend-item"><div class="dot" style="background:var(--commodity-bg); border:1px solid var(--commodity-border);"></div> 商品模差异字段</div>
+        <div class="legend-item"><div class="dot" style="background:#FAEEDA; border:1.5px dashed #854F0B;"></div> Suspend 旁路</div>
+        <div class="legend-item"><div class="dot" style="background:var(--risk-bg); border:1px solid var(--risk-border);"></div> 丢单关闭</div>
+    </div>
+
+</div>
+</body>
+</html>

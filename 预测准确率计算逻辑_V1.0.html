@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>预测准确率计算逻辑 · 模具 & 注塑业务</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f4f6fa; --bg2:#ffffff; --bg3:#f8fafc; --bg4:#edf1f7;
+  --line:rgba(0,0,0,.08); --line2:rgba(0,0,0,.15);
+  --tx:#1a2340; --tx-mid:#4a5578; --tx-dim:#8494b4;
+  --orange:#e07b2a; --orange-d:rgba(224,123,42,.1); --orange-b:rgba(224,123,42,.3);
+  --blue:#2563eb;   --blue-d:rgba(37,99,235,.1);    --blue-b:rgba(37,99,235,.3);
+  --teal:#0ea5a0;   --teal-d:rgba(14,165,160,.1);   --teal-b:rgba(14,165,160,.3);
+  --green:#16a34a;  --green-d:rgba(22,163,74,.1);   --green-b:rgba(22,163,74,.3);
+  --red:#dc2626;    --red-d:rgba(220,38,38,.1);     --red-b:rgba(220,38,38,.3);
+  --gray:#64748b;   --gray-d:rgba(100,116,139,.1);  --gray-b:rgba(100,116,139,.3);
+  --purple:#7c3aed; --purple-d:rgba(124,58,237,.1); --purple-b:rgba(124,58,237,.3);
+  --sans:'Noto Sans SC',sans-serif; --mono:'JetBrains Mono',monospace;
+  --shadow:0 1px 4px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.05);
+  --shadow-md:0 4px 20px rgba(0,0,0,.1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:14px} body{background:var(--bg);color:var(--tx);font-family:var(--sans);font-weight:300;line-height:1.7}
+
+.page{max-width:1000px;margin:0 auto;padding:2rem 1.5rem 5rem}
+
+/* HEADER */
+.doc-header{background:#fff;border-radius:14px;padding:1.75rem 2rem;margin-bottom:1.25rem;
+  box-shadow:var(--shadow);border-left:5px solid var(--orange);
+  display:grid;grid-template-columns:1fr auto;gap:1rem;align-items:start}
+.doc-title{font-size:1.35rem;font-weight:700;color:var(--tx);margin-bottom:.25rem}
+.doc-sub{font-size:.82rem;color:var(--tx-mid)}
+.doc-meta{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.meta-tag{font-family:var(--mono);font-size:.62rem;font-weight:700;padding:3px 10px;
+  border-radius:4px;border:1.5px solid;white-space:nowrap}
+.mt-o{background:var(--orange-d);color:var(--orange);border-color:var(--orange-b)}
+.mt-g{background:var(--gray-d);color:var(--gray);border-color:var(--gray-b)}
+
+/* TABS */
+.tabs{display:flex;gap:6px;margin-bottom:1.25rem}
+.tab-btn{font-size:.8rem;font-weight:500;padding:7px 20px;border-radius:8px;
+  border:1.5px solid var(--line2);background:#fff;color:var(--tx-mid);
+  cursor:pointer;transition:all .15s;box-shadow:var(--shadow)}
+.tab-btn.active{background:var(--orange);color:#fff;border-color:var(--orange);font-weight:700}
+.tab-btn:not(.active):hover{background:var(--bg4);color:var(--tx)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* DOC CARD */
+.doc-card{background:#fff;border-radius:12px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:1rem}
+.dc-head{padding:11px 18px;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:10px;background:var(--bg3)}
+.dc-num{width:27px;height:27px;border-radius:50%;background:var(--orange);color:#fff;
+  font-family:var(--mono);font-size:.7rem;font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.dc-title{font-size:.88rem;font-weight:700;color:var(--tx)}
+.dc-body{padding:16px 18px}
+
+/* CHIPS */
+.chip{display:inline-block;font-size:.6rem;font-weight:700;padding:1px 7px;
+  border-radius:3px;border:1.5px solid;white-space:nowrap;vertical-align:middle;margin:1px}
+.chip.o{background:var(--orange-d);color:var(--orange);border-color:var(--orange-b)}
+.chip.b{background:var(--blue-d);color:var(--blue);border-color:var(--blue-b)}
+.chip.t{background:var(--teal-d);color:var(--teal);border-color:var(--teal-b)}
+.chip.g{background:var(--green-d);color:var(--green);border-color:var(--green-b)}
+.chip.p{background:var(--purple-d);color:var(--purple);border-color:var(--purple-b)}
+.chip.gr{background:var(--gray-d);color:var(--gray);border-color:var(--gray-b)}
+.chip.r{background:var(--red-d);color:var(--red);border-color:var(--red-b)}
+
+/* ALERT */
+.alert{padding:10px 14px;border-radius:8px;border:1.5px solid;font-size:.78rem;
+  line-height:1.7;display:flex;gap:9px;align-items:flex-start}
+.alert.warn{background:#fffbeb;border-color:#fde68a;color:#b45309}
+.alert.info{background:#eff6ff;border-color:#bfdbfe;color:#1d4ed8}
+.alert.good{background:#f0fdf4;border-color:#bbf7d0;color:#15803d}
+.alert strong{font-weight:700}
+.ai{flex-shrink:0;margin-top:1px}
+
+/* TABLES */
+.rtable{width:100%;border-collapse:collapse;font-size:.79rem}
+.rtable th{background:var(--bg3);padding:8px 12px;text-align:left;font-weight:700;
+  color:var(--tx-mid);border-bottom:1.5px solid var(--line)}
+.rtable td{padding:9px 12px;border-bottom:1px solid var(--line);color:var(--tx-mid);
+  vertical-align:middle;line-height:1.6}
+.rtable tr:last-child td{border-bottom:none}
+.rtable tr:hover td{background:var(--bg3)}
+.rtable td:first-child{color:var(--tx);font-weight:500}
+.rtable td.center{text-align:center}
+.rtable td.mono{font-family:var(--mono);font-weight:700}
+
+/* FORMULA BOX */
+.formula-box{
+  background:var(--bg3);border:1.5px solid var(--line2);border-radius:10px;
+  padding:1.25rem 1.5rem;margin:1rem 0;text-align:center;
+}
+.formula-label{font-size:.7rem;font-weight:700;color:var(--tx-dim);
+  letter-spacing:.1em;text-transform:uppercase;margin-bottom:.75rem;font-family:var(--sans)}
+.formula-main{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
+.f-text{font-family:var(--mono);font-size:1rem;font-weight:700;color:var(--tx)}
+.f-fraction{display:inline-flex;flex-direction:column;align-items:center;gap:0;vertical-align:middle;margin:0 4px}
+.f-num{font-family:var(--mono);font-size:.9rem;font-weight:700;color:var(--blue);
+  border-bottom:2px solid var(--tx);padding-bottom:3px;white-space:nowrap}
+.f-den{font-family:var(--mono);font-size:.9rem;font-weight:700;color:var(--orange);
+  padding-top:3px;white-space:nowrap}
+.f-paren{font-family:var(--mono);font-size:1.6rem;color:var(--tx-mid);line-height:1;font-weight:300}
+.f-eq{font-family:var(--mono);font-size:1rem;font-weight:700;color:var(--green)}
+.formula-note{font-size:.76rem;color:var(--tx-mid);margin-top:.75rem;line-height:1.6}
+
+/* BIZ CARDS side by side */
+.biz-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:1rem}
+.biz-card{border-radius:10px;border:1.5px solid;padding:0;overflow:hidden}
+.biz-card.mold{border-color:var(--teal-b)}
+.biz-card.plastic{border-color:var(--orange-b)}
+.biz-card-head{padding:10px 14px;font-size:.85rem;font-weight:700;
+  display:flex;align-items:center;gap:8px}
+.biz-card.mold .biz-card-head{background:var(--teal-d);color:var(--teal)}
+.biz-card.plastic .biz-card-head{background:var(--orange-d);color:var(--orange)}
+.biz-card-body{padding:12px 14px;background:#fff}
+
+/* STAGE ROWS */
+.stage-row{display:flex;align-items:center;gap:10px;padding:9px 0;
+  border-bottom:1px solid var(--line)}
+.stage-row:last-child{border-bottom:none}
+.stage-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.stage-name{font-size:.8rem;font-weight:500;color:var(--tx);flex:1}
+.stage-time{font-family:var(--mono);font-size:.75rem;color:var(--tx-mid);flex-shrink:0;width:80px;text-align:center}
+.stage-wt{font-family:var(--mono);font-size:.78rem;font-weight:700;flex-shrink:0;width:50px;text-align:right}
+
+/* WEIGHT BAR */
+.wt-bar-wrap{margin-top:6px}
+.wt-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.wt-bar-label{font-size:.72rem;color:var(--tx-mid);width:55px;flex-shrink:0}
+.wt-track{flex:1;height:8px;background:var(--bg4);border-radius:4px;overflow:hidden}
+.wt-fill{height:100%;border-radius:4px;transition:width .5s ease}
+.wt-val{font-family:var(--mono);font-size:.72rem;font-weight:700;width:34px;text-align:right;flex-shrink:0}
+
+/* SCORE COLORS */
+.score-s{color:var(--green);font-weight:700}
+.score-m{color:var(--blue);font-weight:700}
+.score-e{color:var(--orange);font-weight:700}
+
+/* ── CALCULATOR ── */
+.calc-wrap{display:flex;flex-direction:column;gap:1rem}
+
+.biz-sel{display:flex;gap:8px;margin-bottom:.25rem}
+.biz-sel-btn{font-size:.8rem;font-weight:500;padding:6px 18px;border-radius:8px;
+  border:1.5px solid var(--line2);background:var(--bg3);color:var(--tx-mid);
+  cursor:pointer;transition:all .15s}
+.biz-sel-btn.active-mold{background:var(--teal-d);color:var(--teal);border-color:var(--teal-b);font-weight:700}
+.biz-sel-btn.active-plastic{background:var(--orange-d);color:var(--orange);border-color:var(--orange-b);font-weight:700}
+.biz-sel-btn:not(.active-mold):not(.active-plastic):hover{background:var(--bg4);color:var(--tx)}
+
+.input-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.input-block{display:flex;flex-direction:column;gap:5px}
+.input-label{font-size:.75rem;font-weight:700;color:var(--tx-mid);display:flex;align-items:center;gap:6px}
+.input-stage-chip{font-family:var(--mono);font-size:.6rem;font-weight:700;padding:1px 6px;
+  border-radius:3px;border:1.5px solid}
+.stage-early{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe}
+.stage-mid  {background:#faf5ff;color:#7c3aed;border-color:#ddd6fe}
+.stage-late {background:#fff7ed;color:#c2410c;border-color:#fed7aa}
+.input-hint{font-size:.68rem;color:var(--tx-dim);font-family:var(--mono)}
+
+.inp-row{display:flex;gap:6px;align-items:center}
+.inp{flex:1;padding:7px 10px;border:1.5px solid var(--line2);border-radius:7px;
+  background:#fff;font-family:var(--mono);font-size:.82rem;color:var(--tx);
+  outline:none;transition:border-color .15s;width:100%}
+.inp:focus{border-color:var(--orange-b);box-shadow:0 0 0 3px var(--orange-d)}
+.inp-unit{font-size:.72rem;color:var(--tx-dim);white-space:nowrap;flex-shrink:0}
+
+/* RESULT AREA */
+.result-area{background:var(--bg3);border:1.5px solid var(--line2);border-radius:10px;
+  padding:1.25rem 1.5rem;display:flex;flex-direction:column;gap:12px}
+.result-rows{display:flex;flex-direction:column;gap:8px}
+.result-row{display:flex;align-items:center;gap:10px;padding:8px 12px;
+  background:#fff;border:1px solid var(--line);border-radius:7px}
+.rr-stage{font-size:.75rem;font-weight:700;width:55px;flex-shrink:0}
+.rr-formula{font-family:var(--mono);font-size:.72rem;color:var(--tx-dim);flex:1}
+.rr-acc{font-family:var(--mono);font-size:.88rem;font-weight:700;width:60px;text-align:right;flex-shrink:0}
+.rr-wt{font-size:.7rem;color:var(--tx-dim);width:36px;text-align:right;flex-shrink:0}
+
+.final-score-wrap{display:flex;align-items:center;gap:16px;
+  background:#fff;border:1.5px solid var(--orange-b);border-radius:10px;
+  padding:14px 18px}
+.fs-label{font-size:.78rem;color:var(--tx-mid)}
+.fs-value{font-family:var(--mono);font-size:2rem;font-weight:700;line-height:1}
+.fs-eq{font-family:var(--mono);font-size:.72rem;color:var(--tx-dim);flex:1;line-height:1.7}
+.status-badge{padding:4px 14px;border-radius:20px;font-size:.75rem;font-weight:700;border:1.5px solid;flex-shrink:0}
+
+.calc-btn{padding:9px 24px;border-radius:8px;background:var(--orange);color:#fff;
+  font-size:.82rem;font-weight:700;border:none;cursor:pointer;
+  transition:all .15s;box-shadow:0 2px 8px var(--orange-d)}
+.calc-btn:hover{background:#c96a1a;transform:translateY(-1px)}
+.calc-btn:active{transform:translateY(0)}
+.reset-btn{padding:9px 18px;border-radius:8px;background:var(--bg3);color:var(--tx-mid);
+  font-size:.82rem;font-weight:500;border:1.5px solid var(--line2);cursor:pointer;transition:all .15s}
+.reset-btn:hover{background:var(--bg4);color:var(--tx)}
+
+.hidden{display:none!important}
+
+.ver-table{width:100%;border-collapse:collapse;font-size:.78rem;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.ver-table th{background:var(--bg3);padding:8px 12px;text-align:left;font-weight:700;color:var(--tx-dim);border-bottom:1px solid var(--line)}
+.ver-table td{padding:8px 12px;border-bottom:1px solid var(--line);color:var(--tx-mid)}
+.ver-table tr:last-child td{border-bottom:none}
+
+@media(max-width:640px){
+  .biz-grid,.input-grid{grid-template-columns:1fr}
+  .doc-header{grid-template-columns:1fr}
+  .doc-meta{align-items:flex-start}
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- HEADER -->
+<div class="doc-header">
+  <div>
+    <div class="doc-title">预测准确率 · 计算逻辑说明</div>
+    <div class="doc-sub">Forecast Accuracy Calculation — 模具业务 & 注塑业务 · 三阶段加权评分</div>
+  </div>
+  <div class="doc-meta">
+    <span class="meta-tag mt-o">V1.0 · 2026-04-22</span>
+    <span class="meta-tag mt-g">东江 / 内部文件</span>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="setTab('logic',this)">计算逻辑</button>
+  <button class="tab-btn" onclick="setTab('calc',this)">在线计算器</button>
+</div>
+
+<!-- ══ LOGIC TAB ══ -->
+<div class="tab-panel active" id="tab-logic">
+
+  <!-- 核心公式 -->
+  <div class="doc-card">
+    <div class="dc-head"><div class="dc-num">一</div><div class="dc-title">核心准确率公式</div></div>
+    <div class="dc-body">
+      <div class="formula-box">
+        <div class="formula-label">单阶段准确率公式（适用于前期 / 中期 / 后期三个阶段）</div>
+        <div class="formula-main">
+          <span class="f-text">准确率</span>
+          <span class="f-text">=</span>
+          <span class="f-paren">(</span>
+          <span class="f-text">1 −</span>
+          <div class="f-fraction">
+            <span class="f-num">|实际 − 预测|</span>
+            <span class="f-den">max(实际, 预测)</span>
+          </div>
+          <span class="f-paren">)</span>
+          <span class="f-text">× 100%</span>
+        </div>
+        <div class="formula-note">
+          · <strong>分子</strong>：实际值与预测值之差的绝对值，衡量偏差大小<br>
+          · <strong>分母</strong>：取实际与预测中的较大值，避免低基数放大误差<br>
+          · 结果区间为 <span style="font-family:var(--mono);font-weight:700;color:var(--green)">0% – 100%</span>，越接近 100% 表示预测越准确
+        </div>
+      </div>
+
+      <div class="alert info" style="margin-top:.5rem">
+        <span class="ai">💡</span>
+        <div><strong>为什么用 max(实际, 预测) 而非实际值？</strong>若预测远超实际（如预测100、实际10），以实际为分母会得出 −900% 的极端值，失去意义。用 max 取两者较大值作分母，可将准确率合理压缩在 0%–100% 区间内，便于横向比较。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 两套业务预测阶段定义 -->
+  <div class="doc-card">
+    <div class="dc-head"><div class="dc-num">二</div><div class="dc-title">两套业务的预测阶段定义</div></div>
+    <div class="dc-body">
+      <div class="biz-grid">
+
+        <!-- 模具业务 -->
+        <div class="biz-card mold">
+          <div class="biz-card-head">
+            <span>🔧</span> 模具业务
+          </div>
+          <div class="biz-card-body">
+            <div class="stage-row">
+              <div class="stage-dot" style="background:#1d4ed8"></div>
+              <span class="stage-name">前期预测</span>
+              <span class="stage-time" style="color:#1d4ed8;font-weight:700">提前 2 个月</span>
+              <span class="stage-wt" style="color:#94a3b8;font-size:.7rem">权重 20%</span>
+            </div>
+            <div class="stage-row">
+              <div class="stage-dot" style="background:#7c3aed"></div>
+              <span class="stage-name">中期预测</span>
+              <span class="stage-time" style="color:#7c3aed;font-weight:700">提前 1 个月</span>
+              <span class="stage-wt" style="color:#94a3b8;font-size:.7rem">权重 30%</span>
+            </div>
+            <div class="stage-row">
+              <div class="stage-dot" style="background:#c2410c"></div>
+              <span class="stage-name">后期预测 <span class="chip o" style="font-size:.55rem">最终</span></span>
+              <span class="stage-time" style="color:#c2410c;font-weight:700">提前 半个月</span>
+              <span class="stage-wt" style="color:#94a3b8;font-size:.7rem">权重 50%</span>
+            </div>
+            <div class="wt-bar-wrap" style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)">
+              <div class="wt-bar-row"><span class="wt-bar-label" style="color:#1d4ed8">前期</span><div class="wt-track"><div class="wt-fill" style="width:20%;background:#1d4ed8"></div></div><span class="wt-val" style="color:#1d4ed8">20%</span></div>
+              <div class="wt-bar-row"><span class="wt-bar-label" style="color:#7c3aed">中期</span><div class="wt-track"><div class="wt-fill" style="width:30%;background:#7c3aed"></div></div><span class="wt-val" style="color:#7c3aed">30%</span></div>
+              <div class="wt-bar-row"><span class="wt-bar-label" style="color:#c2410c">后期</span><div class="wt-track"><div class="wt-fill" style="width:50%;background:#c2410c"></div></div><span class="wt-val" style="color:#c2410c">50%</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 注塑业务 -->
+        <div class="biz-card plastic">
+          <div class="biz-card-head">
+            <span>🏭</span> 注塑业务
+          </div>
+          <div class="biz-card-body">
+            <div class="stage-row">
+              <div class="stage-dot" style="background:#1d4ed8"></div>
+              <span class="stage-name">前期预测</span>
+              <span class="stage-time" style="color:#1d4ed8;font-weight:700">提前 3 个月</span>
+              <span class="stage-wt" style="color:#94a3b8;font-size:.7rem">权重 20%</span>
+            </div>
+            <div class="stage-row">
+              <div class="stage-dot" style="background:#7c3aed"></div>
+              <span class="stage-name">中期预测</span>
+              <span class="stage-time" style="color:#7c3aed;font-weight:700">提前 2 个月</span>
+              <span class="stage-wt" style="color:#94a3b8;font-size:.7rem">权重 30%</span>
+            </div>
+            <div class="stage-row">
+              <div class="stage-dot" style="background:#c2410c"></div>
+              <span class="stage-name">后期预测 <span class="chip o" style="font-size:.55rem">最终</span></span>
+              <span class="stage-time" style="color:#c2410c;font-weight:700">提前 1 个月</span>
+              <span class="stage-wt" style="color:#94a3b8;font-size:.7rem">权重 50%</span>
+            </div>
+            <div class="wt-bar-wrap" style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)">
+              <div class="wt-bar-row"><span class="wt-bar-label" style="color:#1d4ed8">前期</span><div class="wt-track"><div class="wt-fill" style="width:20%;background:#1d4ed8"></div></div><span class="wt-val" style="color:#1d4ed8">20%</span></div>
+              <div class="wt-bar-row"><span class="wt-bar-label" style="color:#7c3aed">中期</span><div class="wt-track"><div class="wt-fill" style="width:30%;background:#7c3aed"></div></div><span class="wt-val" style="color:#7c3aed">30%</span></div>
+              <div class="wt-bar-row"><span class="wt-bar-label" style="color:#c2410c">后期</span><div class="wt-track"><div class="wt-fill" style="width:50%;background:#c2410c"></div></div><span class="wt-val" style="color:#c2410c">50%</span></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="alert warn">
+        <span class="ai">⚠️</span>
+        <div><strong>权重设计逻辑：</strong>后期预测（50%）权重最高，因为离实际发生时间最近，信息最充分，准确率应最高。前期预测（20%）权重最低，因为距离执行期远，不确定因素多，偏差容忍度更大。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 综合准确率公式 -->
+  <div class="doc-card">
+    <div class="dc-head"><div class="dc-num">三</div><div class="dc-title">综合准确率加权计算公式</div></div>
+    <div class="dc-body">
+      <div class="formula-box">
+        <div class="formula-label">综合准确率 = 三阶段加权求和</div>
+        <div class="formula-main" style="font-family:var(--mono);font-size:.95rem;font-weight:700;color:var(--tx);gap:6px;flex-wrap:wrap;justify-content:center">
+          <span style="color:var(--green)">综合准确率</span>
+          <span>=</span>
+          <span style="color:#1d4ed8">准确率<sub style="font-size:.65rem">前期</sub></span>
+          <span>×</span><span style="color:#1d4ed8">20%</span>
+          <span>+</span>
+          <span style="color:#7c3aed">准确率<sub style="font-size:.65rem">中期</sub></span>
+          <span>×</span><span style="color:#7c3aed">30%</span>
+          <span>+</span>
+          <span style="color:#c2410c">准确率<sub style="font-size:.65rem">后期</sub></span>
+          <span>×</span><span style="color:#c2410c">50%</span>
+        </div>
+      </div>
+
+      <!-- 举例说明 -->
+      <div style="margin-top:.75rem">
+        <div style="font-size:.8rem;font-weight:700;color:var(--tx);margin-bottom:.6rem;display:flex;align-items:center;gap:6px">
+          <span style="width:4px;height:14px;background:var(--orange);border-radius:2px;display:inline-block"></span>
+          计算示例（注塑业务）
+        </div>
+        <table class="rtable">
+          <thead>
+            <tr>
+              <th>阶段</th>
+              <th>预测值</th>
+              <th>实际值</th>
+              <th>|偏差|</th>
+              <th>max(实际,预测)</th>
+              <th>单阶段准确率</th>
+              <th>权重</th>
+              <th>加权得分</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="chip b">前期（T-3月）</span></td>
+              <td class="mono">1,200</td>
+              <td class="mono">1,000</td>
+              <td class="mono">200</td>
+              <td class="mono">1,200</td>
+              <td class="mono score-m">(1−200/1200)×100% = 83.3%</td>
+              <td class="center">20%</td>
+              <td class="mono score-m">16.7%</td>
+            </tr>
+            <tr>
+              <td><span class="chip p">中期（T-2月）</span></td>
+              <td class="mono">1,050</td>
+              <td class="mono">1,000</td>
+              <td class="mono">50</td>
+              <td class="mono">1,050</td>
+              <td class="mono score-s">(1−50/1050)×100% = 95.2%</td>
+              <td class="center">30%</td>
+              <td class="mono score-s">28.6%</td>
+            </tr>
+            <tr>
+              <td><span class="chip o">后期（T-1月）</span></td>
+              <td class="mono">980</td>
+              <td class="mono">1,000</td>
+              <td class="mono">20</td>
+              <td class="mono">1,000</td>
+              <td class="mono score-e">(1−20/1000)×100% = 98.0%</td>
+              <td class="center">50%</td>
+              <td class="mono score-e">49.0%</td>
+            </tr>
+            <tr style="background:var(--green-d)">
+              <td colspan="7" style="font-weight:700;color:var(--green);text-align:right;padding-right:16px">综合准确率</td>
+              <td class="mono" style="color:var(--green);font-size:.9rem;font-weight:700">94.3%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 版本记录 -->
+  <div class="doc-card">
+    <div class="dc-head"><div class="dc-num">附</div><div class="dc-title">版本记录</div></div>
+    <div class="dc-body">
+      <table class="ver-table">
+        <thead><tr><th>版本</th><th>日期</th><th>修订内容</th></tr></thead>
+        <tbody>
+          <tr><td style="font-family:var(--mono);font-weight:700">V1.0</td><td>2026-04-22</td><td>首次定稿：明确准确率公式、两套业务三阶段时间定义、权重分配（前20%/中30%/后50%）</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /tab-logic -->
+
+<!-- ══ CALC TAB ══ -->
+<div class="tab-panel" id="tab-calc">
+
+  <div class="doc-card">
+    <div class="dc-head"><div class="dc-num">🧮</div><div class="dc-title">在线准确率计算器</div></div>
+    <div class="dc-body">
+      <div class="calc-wrap">
+
+        <!-- 业务类型选择 -->
+        <div>
+          <div style="font-size:.75rem;font-weight:700;color:var(--tx-mid);margin-bottom:.5rem">选择业务类型</div>
+          <div class="biz-sel">
+            <button class="biz-sel-btn active-mold" id="btn-mold" onclick="selectBiz('mold')">🔧 模具业务</button>
+            <button class="biz-sel-btn" id="btn-plastic" onclick="selectBiz('plastic')">🏭 注塑业务</button>
+          </div>
+          <div id="biz-hint" style="font-size:.72rem;color:var(--tx-dim);margin-top:4px;font-family:var(--mono)">
+            模具业务：前期=T-2月 · 中期=T-1月 · 后期=T-半月
+          </div>
+        </div>
+
+        <!-- 输入区 -->
+        <div class="input-grid">
+
+          <!-- 前期 -->
+          <div class="input-block">
+            <div class="input-label">
+              <span class="input-stage-chip stage-early">前期预测</span>
+              <span style="font-size:.68rem;color:var(--tx-dim)" id="early-hint">（T − 2个月）</span>
+            </div>
+            <div class="inp-row">
+              <input class="inp" type="number" id="e-pred" placeholder="预测值" min="0" oninput="autoCalc()">
+              <span class="inp-unit">预测</span>
+            </div>
+            <div class="inp-row">
+              <input class="inp" type="number" id="e-actual" placeholder="实际值" min="0" oninput="autoCalc()">
+              <span class="inp-unit">实际</span>
+            </div>
+            <div class="input-hint" id="e-acc-hint" style="color:var(--tx-dim)">—</div>
+          </div>
+
+          <!-- 中期 -->
+          <div class="input-block">
+            <div class="input-label">
+              <span class="input-stage-chip stage-mid">中期预测</span>
+              <span style="font-size:.68rem;color:var(--tx-dim)" id="mid-hint">（T − 1个月）</span>
+            </div>
+            <div class="inp-row">
+              <input class="inp" type="number" id="m-pred" placeholder="预测值" min="0" oninput="autoCalc()">
+              <span class="inp-unit">预测</span>
+            </div>
+            <div class="inp-row">
+              <input class="inp" type="number" id="m-actual" placeholder="实际值" min="0" oninput="autoCalc()">
+              <span class="inp-unit">实际</span>
+            </div>
+            <div class="input-hint" id="m-acc-hint" style="color:var(--tx-dim)">—</div>
+          </div>
+
+          <!-- 后期 -->
+          <div class="input-block">
+            <div class="input-label">
+              <span class="input-stage-chip stage-late">后期预测</span>
+              <span style="font-size:.68rem;color:var(--tx-dim)" id="late-hint">（T − 半个月）</span>
+            </div>
+            <div class="inp-row">
+              <input class="inp" type="number" id="l-pred" placeholder="预测值" min="0" oninput="autoCalc()">
+              <span class="inp-unit">预测</span>
+            </div>
+            <div class="inp-row">
+              <input class="inp" type="number" id="l-actual" placeholder="实际值" min="0" oninput="autoCalc()">
+              <span class="inp-unit">实际</span>
+            </div>
+            <div class="input-hint" id="l-acc-hint" style="color:var(--tx-dim)">—</div>
+          </div>
+
+        </div>
+
+        <!-- 按钮 -->
+        <div style="display:flex;gap:8px">
+          <button class="calc-btn" onclick="calculate()">计算准确率</button>
+          <button class="reset-btn" onclick="resetCalc()">重置</button>
+        </div>
+
+        <!-- 结果区 -->
+        <div id="result-section" class="hidden">
+          <div style="font-size:.78rem;font-weight:700;color:var(--tx-mid);margin-bottom:.5rem">计算明细</div>
+          <div class="result-area">
+            <div class="result-rows">
+              <div class="result-row">
+                <span class="rr-stage" style="color:#1d4ed8">前期</span>
+                <span class="rr-formula" id="rr-e-formula">—</span>
+                <span class="rr-acc" id="rr-e-acc" style="color:#1d4ed8">—</span>
+                <span class="rr-wt" style="color:#1d4ed8">×20%</span>
+              </div>
+              <div class="result-row">
+                <span class="rr-stage" style="color:#7c3aed">中期</span>
+                <span class="rr-formula" id="rr-m-formula">—</span>
+                <span class="rr-acc" id="rr-m-acc" style="color:#7c3aed">—</span>
+                <span class="rr-wt" style="color:#7c3aed">×30%</span>
+              </div>
+              <div class="result-row">
+                <span class="rr-stage" style="color:#c2410c">后期</span>
+                <span class="rr-formula" id="rr-l-formula">—</span>
+                <span class="rr-acc" id="rr-l-acc" style="color:#c2410c">—</span>
+                <span class="rr-wt" style="color:#c2410c">×50%</span>
+              </div>
+            </div>
+            <div class="final-score-wrap">
+              <div>
+                <div class="fs-label">综合准确率</div>
+                <div class="fs-value" id="final-val" style="color:var(--green)">—</div>
+              </div>
+              <div class="fs-eq" id="final-eq">—</div>
+              <div class="status-badge" id="status-badge" style="background:var(--gray-d);color:var(--gray);border-color:var(--gray-b)">—</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div><!-- /tab-calc -->
+
+</div><!-- /page -->
+
+<script>
+// ── TAB ──
+function setTab(name,btn){
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active')});
+  document.querySelectorAll('.tab-panel').forEach(function(p){p.classList.remove('active')});
+  btn.classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+}
+
+// ── BIZ SELECTOR ──
+var currentBiz = 'mold';
+var BIZ_CONFIG = {
+  mold:    {early:'T − 2 个月', mid:'T − 1 个月', late:'T − 半个月', hint:'模具业务：前期=T-2月 · 中期=T-1月 · 后期=T-半个月'},
+  plastic: {early:'T − 3 个月', mid:'T − 2 个月', late:'T − 1 个月',  hint:'注塑业务：前期=T-3月 · 中期=T-2月 · 后期=T-1月'}
+};
+function selectBiz(biz){
+  currentBiz = biz;
+  document.getElementById('btn-mold').className    = 'biz-sel-btn' + (biz==='mold'   ?' active-mold':'');
+  document.getElementById('btn-plastic').className = 'biz-sel-btn' + (biz==='plastic'?' active-plastic':'');
+  var cfg = BIZ_CONFIG[biz];
+  document.getElementById('biz-hint').textContent   = cfg.hint;
+  document.getElementById('early-hint').textContent = '（' + cfg.early + '）';
+  document.getElementById('mid-hint').textContent   = '（' + cfg.mid   + '）';
+  document.getElementById('late-hint').textContent  = '（' + cfg.late  + '）';
+  resetCalc();
+}
+
+// ── FORMULA ──
+function accRate(pred, actual){
+  if(pred<=0 && actual<=0) return 100;
+  var diff = Math.abs(actual - pred);
+  var denom = Math.max(actual, pred);
+  if(denom === 0) return 100;
+  return (1 - diff/denom)*100;
+}
+function fmt(v){ return v.toFixed(1)+'%'; }
+
+// ── AUTO HINT per row ──
+function autoCalc(){
+  var stages = [
+    {pid:'e-pred',aid:'e-actual',hid:'e-acc-hint',col:'#1d4ed8'},
+    {pid:'m-pred',aid:'m-actual',hid:'m-acc-hint',col:'#7c3aed'},
+    {pid:'l-pred',aid:'l-actual',hid:'l-acc-hint',col:'#c2410c'},
+  ];
+  stages.forEach(function(s){
+    var p=parseFloat(document.getElementById(s.pid).value);
+    var a=parseFloat(document.getElementById(s.aid).value);
+    var hint=document.getElementById(s.hid);
+    if(!isNaN(p)&&!isNaN(a)){
+      var acc=accRate(p,a);
+      hint.textContent='准确率 = '+fmt(acc);
+      hint.style.color=acc>=90?'#16a34a':acc>=75?'#d97706':'#dc2626';
+    } else {
+      hint.textContent='—'; hint.style.color='var(--tx-dim)';
+    }
+  });
+}
+
+// ── CALCULATE ──
+function calculate(){
+  var ep=parseFloat(document.getElementById('e-pred').value);
+  var ea=parseFloat(document.getElementById('e-actual').value);
+  var mp=parseFloat(document.getElementById('m-pred').value);
+  var ma=parseFloat(document.getElementById('m-actual').value);
+  var lp=parseFloat(document.getElementById('l-pred').value);
+  var la=parseFloat(document.getElementById('l-actual').value);
+
+  var valid = [ep,ea,mp,ma,lp,la].every(function(v){return !isNaN(v)&&v>=0});
+  if(!valid){
+    alert('请填写全部六个输入值（预测值和实际值均须 ≥ 0）');
+    return;
+  }
+
+  var ae=accRate(ep,ea), am=accRate(mp,ma), al=accRate(lp,la);
+  var final = ae*0.2 + am*0.3 + al*0.5;
+
+  // formulas
+  function rowFmt(pred,actual,acc){
+    var diff=Math.abs(actual-pred).toFixed(0);
+    var denom=Math.max(actual,pred).toFixed(0);
+    return '(1 − '+diff+'/'+denom+') × 100%';
+  }
+  document.getElementById('rr-e-formula').textContent = rowFmt(ep,ea,ae);
+  document.getElementById('rr-m-formula').textContent = rowFmt(mp,ma,am);
+  document.getElementById('rr-l-formula').textContent = rowFmt(lp,la,al);
+  document.getElementById('rr-e-acc').textContent = fmt(ae);
+  document.getElementById('rr-m-acc').textContent = fmt(am);
+  document.getElementById('rr-l-acc').textContent = fmt(al);
+
+  var fv = document.getElementById('final-val');
+  fv.textContent = fmt(final);
+  fv.style.color = final>=90?'var(--green)':final>=75?'var(--orange)':'var(--red)';
+
+  document.getElementById('final-eq').textContent =
+    fmt(ae)+' × 20%  +  '+fmt(am)+' × 30%  +  '+fmt(al)+' × 50%\n= '+
+    (ae*.2).toFixed(1)+'% + '+(am*.3).toFixed(1)+'% + '+(al*.5).toFixed(1)+'%\n= '+fmt(final);
+
+  var sb = document.getElementById('status-badge');
+  if(final>=90){
+    sb.textContent='优秀 ≥ 90%';
+    sb.style.cssText='background:var(--green-d);color:var(--green);border-color:var(--green-b)';
+  } else if(final>=75){
+    sb.textContent='良好 75–90%';
+    sb.style.cssText='background:var(--orange-d);color:var(--orange);border-color:var(--orange-b)';
+  } else {
+    sb.textContent='待改善 < 75%';
+    sb.style.cssText='background:var(--red-d);color:var(--red);border-color:var(--red-b)';
+  }
+
+  document.getElementById('result-section').classList.remove('hidden');
+}
+
+// ── RESET ──
+function resetCalc(){
+  ['e-pred','e-actual','m-pred','m-actual','l-pred','l-actual'].forEach(function(id){
+    document.getElementById(id).value='';
+  });
+  ['e-acc-hint','m-acc-hint','l-acc-hint'].forEach(function(id){
+    var el=document.getElementById(id); el.textContent='—'; el.style.color='var(--tx-dim)';
+  });
+  document.getElementById('result-section').classList.add('hidden');
+}
+</script>
+</body>
+</html>
