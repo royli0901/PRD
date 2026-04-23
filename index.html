@@ -4,121 +4,110 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>文件快捷入口</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="dtbp-design.css">
     <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            padding: 24px;
-            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
-            background: #f5f7fb;
-            color: #1f2937;
-        }
-
-        .wrap {
-            max-width: 980px;
-            margin: 0 auto;
-            background: #fff;
-            border-radius: 14px;
-            padding: 24px;
-            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
-        }
-
-        h1 {
-            margin: 0;
-            font-size: 24px;
-        }
-
-        .desc {
-            margin: 8px 0 20px;
-            color: #4b5563;
-            font-size: 14px;
-        }
-
-        .section {
-            margin-top: 18px;
-        }
-
-        .section-title {
-            margin: 0 0 10px;
-            font-size: 16px;
-            color: #374151;
-        }
-
-        .grid {
+        .quick-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-            gap: 12px;
+            gap: 10px;
         }
 
-        .btn {
+        .quick-link {
             display: block;
             text-decoration: none;
-            padding: 12px 14px;
-            border-radius: 10px;
-            border: 1px solid #d1d5db;
-            background: #f9fafb;
-            color: #111827;
-            font-size: 14px;
-            line-height: 1.35;
-            transition: all 0.18s ease;
+            padding: 10px 12px;
+            border-radius: var(--r);
+            border: 1.5px solid var(--line-md);
+            background: var(--bg-card);
+            color: var(--tx-mid);
+            font-size: 0.8rem;
+            line-height: 1.6;
+            transition: all .15s;
+            box-shadow: var(--shadow-sm);
             word-break: break-all;
         }
 
-        .btn:hover {
+        .quick-link:hover {
+            border-color: var(--accent-b);
+            background: var(--accent-d);
+            color: var(--accent-hv);
             transform: translateY(-1px);
-            border-color: #6366f1;
-            background: #eef2ff;
-            color: #3730a3;
         }
     </style>
 </head>
 <body>
-    <div class="wrap">
-        <h1>当前目录快捷入口</h1>
-        <p class="desc">点击按钮可直接打开当前目录下的文件（已排除 index.html），并按业务模块分组展示。</p>
-
-        <div class="section">
-            <h2 class="section-title">客户管理</h2>
-            <div class="grid">
-                <a class="btn" href="客户健康度方案.html" target="_blank">客户健康度方案.html</a>
-                <a class="btn" href="客户健康度演示.html" target="_blank">客户健康度演示.html</a>
-                <a class="btn" href="客户生命周期.html" target="_blank">客户生命周期.html</a>
+    <div class="dtbp-page">
+        <header class="doc-header">
+            <div>
+                <div class="doc-title">当前目录快捷入口</div>
+                <p class="doc-sub">点击按钮可直接打开当前目录下的文件（已排除 index.html），并按业务模块分组展示。</p>
             </div>
-        </div>
-
-        <div class="section">
-            <h2 class="section-title">商机管理</h2>
-            <div class="grid">
-                <a class="btn" href="线索转商机.html" target="_blank">线索转商机.html</a>
-                <a class="btn" href="商机推进.html" target="_blank">商机推进.html</a>
+            <div class="doc-meta">
+                <span class="meta-tag mt-accent">DTBP</span>
+                <span class="meta-tag mt-gray">快捷导航</span>
             </div>
-        </div>
+        </header>
 
-        <div class="section">
-            <h2 class="section-title">改模流程</h2>
-            <div class="grid">
-                <a class="btn" href="改模流程_模塑一体_V1.1.html" target="_blank">改模流程_模塑一体_V1.1.html</a>
-                <a class="btn" href="改模流程_模塑一体_V1.2.html" target="_blank">改模流程_模塑一体_V1.2.html</a>
-                <a class="btn" href="改模流程_模塑一体_V1.3.html" target="_blank">改模流程_模塑一体_V1.3.html</a>
+        <section class="doc-card">
+            <div class="dc-head">
+                <div class="dc-title">客户管理</div>
             </div>
-        </div>
+            <div class="dc-body">
+                <div class="quick-grid">
+                    <a class="quick-link" href="客户健康度方案.html" target="_blank">客户健康度方案.html</a>
+                    <a class="quick-link" href="客户健康度演示.html" target="_blank">客户健康度演示.html</a>
+                    <a class="quick-link" href="客户生命周期.html" target="_blank">客户生命周期.html</a>
+                </div>
+            </div>
+        </section>
 
-        <div class="section">
-            <h2 class="section-title">预测分析</h2>
-            <div class="grid">
-                <a class="btn" href="预测准确率计算逻辑_V1.0.html" target="_blank">预测准确率计算逻辑_V1.0.html</a>
+        <section class="doc-card">
+            <div class="dc-head">
+                <div class="dc-title">商机管理</div>
             </div>
-        </div>
+            <div class="dc-body">
+                <div class="quick-grid">
+                    <a class="quick-link" href="线索转商机.html" target="_blank">线索转商机.html</a>
+                    <a class="quick-link" href="商机推进.html" target="_blank">商机推进.html</a>
+                </div>
+            </div>
+        </section>
 
-        <div class="section">
-            <h2 class="section-title">资料文档</h2>
-            <div class="grid">
-                <a class="btn" href="改模流程-模塑一体业务.pdf" target="_blank">改模流程-模塑一体业务.pdf</a>
+        <section class="doc-card">
+            <div class="dc-head">
+                <div class="dc-title">改模流程</div>
             </div>
-        </div>
+            <div class="dc-body">
+                <div class="quick-grid">
+                    <a class="quick-link" href="改模流程_模塑一体_V1.1.html" target="_blank">改模流程_模塑一体_V1.1.html</a>
+                    <a class="quick-link" href="改模流程_模塑一体_V1.2.html" target="_blank">改模流程_模塑一体_V1.2.html</a>
+                    <a class="quick-link" href="改模流程_模塑一体_V1.3.html" target="_blank">改模流程_模塑一体_V1.3.html</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="doc-card">
+            <div class="dc-head">
+                <div class="dc-title">预测分析</div>
+            </div>
+            <div class="dc-body">
+                <div class="quick-grid">
+                    <a class="quick-link" href="预测准确率计算逻辑_V1.0.html" target="_blank">预测准确率计算逻辑_V1.0.html</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="doc-card">
+            <div class="dc-head">
+                <div class="dc-title">资料文档</div>
+            </div>
+            <div class="dc-body">
+                <div class="quick-grid">
+                    <a class="quick-link" href="改模流程-模塑一体业务.pdf" target="_blank">改模流程-模塑一体业务.pdf</a>
+                </div>
+            </div>
+        </section>
     </div>
 </body>
 </html>
